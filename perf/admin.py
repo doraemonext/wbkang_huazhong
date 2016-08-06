@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from suit.admin import SortableModelAdmin
 from mptt.admin import MPTTModelAdmin
 from django.contrib import admin
-from perf.models import Area, Job, Staff, Client, ClientTarget, StaffTarget
+from perf.models import Area, Job, Staff, Client, ClientTarget, StaffTarget, BonusHistory
 
 
 class AreaAdmin(MPTTModelAdmin, SortableModelAdmin):
@@ -95,6 +95,31 @@ class StaffTargetAdmin(admin.ModelAdmin):
     date.short_description = '日期'
 
 
+class BonusHistoryAdmin(admin.ModelAdmin):
+    list_display = ('date', 'staff', 'last_month_reach_percent', 'current_month_reach_percent', 'sfa_reach_percent', 'sale_bonus', 'exam_bonus', 'total_bonus')
+
+    def date(self, obj):
+        return "%d年%d月" % (obj.year, obj.month)
+
+    def last_month_reach_percent(self, obj):
+        return "%d%%" % (obj.last_month_reach * 100)
+
+    def current_month_reach_percent(self, obj):
+        return "%d%%" % (obj.current_month_reach * 100)
+
+    def sfa_reach_percent(self, obj):
+        return "%d%%" % (obj.sfa_reach * 100)
+
+    def total_bonus(self, obj):
+        return "%0.2f" % (obj.sale_bonus + obj.exam_bonus)
+
+    date.short_description = '日期'
+    last_month_reach_percent.short_description = '上月客户达成率'
+    current_month_reach_percent.short_description = '本月客户达成率'
+    sfa_reach_percent.short_description = 'SFA回单达成系数占比'
+    total_bonus.short_description = '奖金合计'
+
+
 admin.site.empty_value_display = '无'
 admin.site.register(Area, AreaAdmin)
 admin.site.register(Job, JobAdmin)
@@ -102,3 +127,4 @@ admin.site.register(Staff, StaffAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(ClientTarget, ClientTargetAdmin)
 admin.site.register(StaffTarget, StaffTargetAdmin)
+admin.site.register(BonusHistory, BonusHistoryAdmin)

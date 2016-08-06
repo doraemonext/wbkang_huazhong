@@ -169,3 +169,31 @@ class StaffTarget(models.Model):
         verbose_name_plural = '员工目标管理 '
         ordering = ['-id']
 
+
+class BonusHistory(models.Model):
+    """
+    奖金历史记录 Model
+    """
+    year = models.IntegerField('年')
+    month = models.IntegerField('月')
+    staff = models.ForeignKey(Staff, verbose_name='员工')
+    last_month_reach = models.FloatField('上月客户达成率')
+    current_month_reach = models.FloatField('本月客户达成率')
+    sfa_reach = models.FloatField('SFA回单达成系数占比')
+    sale_bonus = models.FloatField('个人销售奖金')
+    exam_bonus = models.FloatField('个人考核奖金')
+
+    def clean(self):
+        if self.year < 1900 or self.year > 2100 or self.month < 1 or self.month > 12:
+            raise ValidationError('年月不合法')
+        if self.pk is None and BonusHistory.objects.filter(year=self.year, month=self.month, staff=self.staff).exists():
+            raise ValidationError('员工 %s 的 %d 年 %d 月奖金历史记录已存在, 请返回上一页搜索' % (self.staff, self.year, self.month))
+
+    def __unicode__(self):
+        return "%s %d-%d" % (self.staff, self.year, self.month)
+
+    class Meta:
+        db_table = 'perf_bonus_history'
+        verbose_name = '奖金历史记录'
+        verbose_name_plural = '奖金历史记录'
+        ordering = ['-id']

@@ -118,4 +118,17 @@ SUIT_CONFIG = {
     'ADMIN_NAME': '康师傅奖金计算',
     'MENU_EXCLUDE': ('auth.group', ),
     'LIST_PER_PAGE': 30,
+    'MENU': (
+        '-',
+        {'label': '奖金计算', 'icon': 'icon-leaf', 'models': (
+            'perf.area',
+            'perf.job',
+            'perf.staff',
+            'perf.client',
+            'perf.clienttarget',
+            'perf.stafftarget',
+            'perf.bonushistory',
+        )},
+        {'label': '系统用户管理', 'icon': 'icon-lock', 'models': ('auth.user',)},
+    )
 }
