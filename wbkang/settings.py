@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+import rest_framework
+
 """
 Django settings for wbkang project.
 
@@ -45,6 +47,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mptt',
+    'rest_framework',
     'perf',
 )
 
@@ -131,4 +134,11 @@ SUIT_CONFIG = {
         )},
         {'label': '系统用户管理', 'icon': 'icon-lock', 'models': ('auth.user',)},
     )
+}
+
+# Rest Framework
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny'
+    ]
 }
