@@ -24,7 +24,10 @@ class Area(MPTTModel):
     class MPTTMeta:
         order_insertion_by = ['order']
 
+    class Meta:
+        verbose_name = '地区管理'
+        verbose_name_plural = '地区管理'
+
     def save(self, *args, **kwargs):
         super(Area, self).save(*args, **kwargs)
         Area.objects.rebuild()
-

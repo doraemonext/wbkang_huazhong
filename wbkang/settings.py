@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 """
 Django settings for wbkang project.
 
@@ -106,3 +110,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Django Suit
+SUIT_CONFIG = {
+    'ADMIN_NAME': '康师傅奖金计算',
+    'MENU_EXCLUDE': ('auth.group', ),
+    'LIST_PER_PAGE': 30,
+}
