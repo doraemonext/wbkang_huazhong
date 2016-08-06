@@ -18,7 +18,7 @@ class AreaAdmin(MPTTModelAdmin, SortableModelAdmin):
 
 
 class JobAdmin(admin.ModelAdmin):
-    list_display = ('name', 'bonus_base', 'job_weight', 'sale_target_percent', 'exam_target_percent', 'profit_target_percent')
+    list_display = ('name', 'bonus_base', 'job_weight', 'sale_target_percent', 'exam_target_percent', 'profit_target_percent', 'has_trial')
 
     def sale_target_percent(self, obj):
         return "%d%%" % (obj.sale_target * 100)

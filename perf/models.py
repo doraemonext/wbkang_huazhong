@@ -45,6 +45,8 @@ class Job(models.Model):
     sale_target = models.FloatField('销售指标')
     exam_target = models.FloatField('考核指标')
     profit_target = models.FloatField('利润达成指标', default=0)
+    has_trial = models.BooleanField('存在试用期', default=False)
+    trial_days = models.IntegerField('试用期时长(天)', help_text='仅在存在试用期时有效', default=180)
 
     def __unicode__(self):
         return self.name
@@ -93,10 +95,10 @@ class Staff(models.Model):
 
     def get_status(self):
         if self.status == self.STATUS_ACTIVE:
-            if (datetime.date.today() - self.entry_date).days > 6 * 30:
-                return self.STATUS_ACTIVE
-            else:
+            if self.job.has_trial and (datetime.date.today() - self.entry_date).days <= self.job.trial_days:
                 return self.STATUS_TRIAL
+            else:
+                return self.STATUS_ACTIVE
         else:
             return self.STATUS_INACTIVE
 
