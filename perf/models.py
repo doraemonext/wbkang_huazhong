@@ -41,11 +41,11 @@ class Job(models.Model):
     岗位 Model
     """
     name = models.CharField('名称', max_length=100)
-    bonus_base = models.FloatField('奖金基数')
+    bonus_base = models.FloatField('奖金基数(元)')
     job_weight = models.FloatField('职务权数')
-    sale_target = models.FloatField('销售指标')
-    exam_target = models.FloatField('考核指标')
-    profit_target = models.FloatField('利润达成指标', default=0)
+    sale_target = models.FloatField('销售指标', help_text='取值范围 0 - 1')
+    exam_target = models.FloatField('考核指标', help_text='取值范围 0 - 1')
+    profit_target = models.FloatField('利润达成指标', default=0, help_text='取值范围 0 - 1')
     has_trial = models.BooleanField('存在试用期', default=False)
     trial_days = models.IntegerField('试用期时长(天)', help_text='仅在存在试用期时有效', default=180)
 
@@ -177,9 +177,9 @@ class BonusHistory(models.Model):
     year = models.IntegerField('年')
     month = models.IntegerField('月')
     staff = models.ForeignKey(Staff, verbose_name='员工')
-    last_month_reach = models.FloatField('上月客户达成率')
-    current_month_reach = models.FloatField('本月客户达成率')
-    sfa_reach = models.FloatField('SFA回单达成系数占比')
+    last_month_reach = models.FloatField('上月客户达成率', help_text='取值范围 0 - 1')
+    current_month_reach = models.FloatField('本月客户达成率', help_text='取值范围 0 - 1')
+    sfa_reach = models.FloatField('SFA回单达成系数占比', help_text='取值范围 0 - 1')
     sale_bonus = models.FloatField('个人销售奖金')
     exam_bonus = models.FloatField('个人考核奖金')
 
