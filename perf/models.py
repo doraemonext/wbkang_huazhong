@@ -25,9 +25,31 @@ class Area(MPTTModel):
         order_insertion_by = ['order']
 
     class Meta:
+        db_table = 'perf_area'
         verbose_name = '地区管理'
         verbose_name_plural = '地区管理'
 
     def save(self, *args, **kwargs):
         super(Area, self).save(*args, **kwargs)
         Area.objects.rebuild()
+
+
+class Job(models.Model):
+    """
+    岗位 Model
+    """
+    name = models.CharField('名称', max_length=100)
+    bonus_base = models.FloatField('奖金基数')
+    job_weight = models.FloatField('职务权数')
+    sale_target = models.FloatField('销售指标')
+    exam_target = models.FloatField('考核指标')
+    profit_target = models.FloatField('利润达成指标', default=0)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'perf_job'
+        verbose_name = '岗位管理'
+        verbose_name_plural = '岗位管理'
+        ordering = ['id']
