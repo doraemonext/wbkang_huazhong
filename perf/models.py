@@ -139,7 +139,7 @@ class ClientTarget(models.Model):
     def clean(self):
         if self.year < 1900 or self.year > 2100 or self.month < 1 or self.month > 12:
             raise ValidationError('年月不合法')
-        if ClientTarget.objects.filter(client=self.client, year=self.year, month=self.month).exists():
+        if self.pk is None and ClientTarget.objects.filter(client=self.client, year=self.year, month=self.month).exists():
             raise ValidationError('客户 %s 的 %d 年 %d 月目标已存在, 请返回上一页搜索' % (self.client, self.year, self.month))
 
     def __unicode__(self):
@@ -168,3 +168,4 @@ class StaffTarget(models.Model):
         verbose_name = '员工目标管理'
         verbose_name_plural = '员工目标管理 '
         ordering = ['-id']
+
