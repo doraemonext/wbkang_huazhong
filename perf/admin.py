@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from suit.admin import SortableModelAdmin
 from mptt.admin import MPTTModelAdmin
 from django.contrib import admin
-from perf.models import Area, Job, Staff, Client, ClientTarget
+from perf.models import Area, Job, Staff, Client, ClientTarget, StaffTarget
 
 
 class AreaAdmin(MPTTModelAdmin, SortableModelAdmin):
@@ -60,16 +60,45 @@ class ClientAdmin(admin.ModelAdmin):
     list_display = ('identifier', 'name')
 
 
+class StaffTargetInline(admin.StackedInline):
+    model = StaffTarget
+    min_num = 0
+    max_num = 100
+    verbose_name = '员工目标'
+    verbose_name_plural = '员工目标'
+
+
 class ClientTargetAdmin(admin.ModelAdmin):
     list_display = ('client', 'date', 'target')
+    inlines = [StaffTargetInline, ]
 
     def date(self, obj):
         return "%d年%d月" % (obj.year, obj.month)
 
     date.short_description = '日期'
 
+
+class StaffTargetAdmin(admin.ModelAdmin):
+    list_display = ('staff', 'client_name', 'date', 'client_target_amount',  'target')
+
+    def client_name(self, obj):
+        return "%s" % obj.client_target.client.name + ' (' + obj.client_target.client.identifier + ')'
+
+    def client_target_amount(self, obj):
+        return "%d" % obj.client_target.target
+
+    def date(self, obj):
+        return "%d年%d月" % (obj.client_target.year, obj.client_target.month)
+
+    client_name.short_description = '客户'
+    client_target_amount.short_description = '客户目标(元)'
+    date.short_description = '日期'
+
+
+admin.site.empty_value_display = '无'
 admin.site.register(Area, AreaAdmin)
 admin.site.register(Job, JobAdmin)
 admin.site.register(Staff, StaffAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(ClientTarget, ClientTargetAdmin)
+admin.site.register(StaffTarget, StaffTargetAdmin)

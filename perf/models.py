@@ -150,3 +150,21 @@ class ClientTarget(models.Model):
         verbose_name = '客户目标管理'
         verbose_name_plural = '客户目标管理'
         ordering = ['-year', '-month', '-id']
+
+
+class StaffTarget(models.Model):
+    """
+    员工目标管理 Model
+    """
+    staff = models.ForeignKey(Staff, verbose_name='员工')
+    client_target = models.ForeignKey(ClientTarget, verbose_name='客户目标')
+    target = models.FloatField('个人目标(元)')
+
+    def __unicode__(self):
+        return self.staff.name + ' - ' + self.client_target.__unicode__()
+
+    class Meta:
+        db_table = 'perf_staff_target'
+        verbose_name = '员工目标管理'
+        verbose_name_plural = '员工目标管理 '
+        ordering = ['-id']
