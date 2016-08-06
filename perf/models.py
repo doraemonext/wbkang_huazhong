@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import datetime
 from django.db import models
+from django.core.exceptions import ValidationError
 from mptt.models import MPTTModel, TreeForeignKey
 
 
@@ -55,7 +56,7 @@ class Job(models.Model):
         db_table = 'perf_job'
         verbose_name = '岗位管理'
         verbose_name_plural = '岗位管理'
-        ordering = ['id']
+        ordering = ['-id']
 
 
 class Staff(models.Model):
@@ -106,4 +107,46 @@ class Staff(models.Model):
         db_table = 'perf_staff'
         verbose_name = '员工管理'
         verbose_name_plural = '员工管理'
-        ordering = ['id']
+        ordering = ['-id']
+
+
+class Client(models.Model):
+    """
+    客户 Model
+    """
+    identifier = models.CharField('客户代码', max_length=100)
+    name = models.CharField('客户名称', max_length=100)
+
+    def __unicode__(self):
+        return self.name + ' (' + self.identifier + ')'
+
+    class Meta:
+        db_table = 'perf_client'
+        verbose_name = '客户信息管理'
+        verbose_name_plural = '客户信息管理'
+        ordering = ['-id']
+
+
+class ClientTarget(models.Model):
+    """
+    客户目标 Model
+    """
+    client = models.ForeignKey(Client, verbose_name='客户')
+    year = models.IntegerField("年")
+    month = models.IntegerField("月")
+    target = models.FloatField("客户目标金额(元)")
+
+    def clean(self):
+        if self.year < 1900 or self.year > 2100 or self.month < 1 or self.month > 12:
+            raise ValidationError('年月不合法')
+        if ClientTarget.objects.filter(client=self.client, year=self.year, month=self.month).exists():
+            raise ValidationError('客户 %s 的 %d 年 %d 月目标已存在, 请返回上一页搜索' % (self.client, self.year, self.month))
+
+    def __unicode__(self):
+        return "%s(%s) %d-%d" % (self.client.name, self.client.identifier, self.year, self.month)
+
+    class Meta:
+        db_table = 'perf_client_target'
+        verbose_name = '客户目标管理'
+        verbose_name_plural = '客户目标管理'
+        ordering = ['-year', '-month', '-id']

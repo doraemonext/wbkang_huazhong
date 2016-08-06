@@ -2,12 +2,10 @@
 
 from __future__ import unicode_literals
 
-import datetime
 from suit.admin import SortableModelAdmin
 from mptt.admin import MPTTModelAdmin
 from django.contrib import admin
-from django.forms import ModelForm, PasswordInput
-from perf.models import Area, Job, Staff
+from perf.models import Area, Job, Staff, Client, ClientTarget
 
 
 class AreaAdmin(MPTTModelAdmin, SortableModelAdmin):
@@ -58,6 +56,20 @@ class StaffAdmin(admin.ModelAdmin):
             return {'class': css_class}
 
 
+class ClientAdmin(admin.ModelAdmin):
+    list_display = ('identifier', 'name')
+
+
+class ClientTargetAdmin(admin.ModelAdmin):
+    list_display = ('client', 'date', 'target')
+
+    def date(self, obj):
+        return "%d年%d月" % (obj.year, obj.month)
+
+    date.short_description = '日期'
+
 admin.site.register(Area, AreaAdmin)
 admin.site.register(Job, JobAdmin)
 admin.site.register(Staff, StaffAdmin)
+admin.site.register(Client, ClientAdmin)
+admin.site.register(ClientTarget, ClientTargetAdmin)
