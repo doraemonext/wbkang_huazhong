@@ -23,7 +23,7 @@ class Area(MPTTModel):
         return res
 
     class MPTTMeta:
-        order_insertion_by = ['id']
+        order_insertion_by = ['name']
 
     class Meta:
         db_table = 'perf_area'
