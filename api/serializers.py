@@ -14,7 +14,7 @@ class LoginServializer(serializers.Serializer):
 class Calc1ToNSerializer(serializers.Serializer):
     current_client_reach = serializers.FloatField(required=True)
     current_sfa_reach = serializers.FloatField(required=True)
-    others = serializers.CharField(required=True, allow_blank=False)
+    others = serializers.CharField(required=True, allow_blank=True)
 
     def validate(self, data):
         others_list = data['others'].split(',')
