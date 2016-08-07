@@ -279,3 +279,12 @@ body {
 .padding{
   padding: 15px;
 }
+
+.weui_label_big {
+    width: 10em;
+}
+
+.weui_cell_right {
+    position: absolute;
+    right: 1px;
+}
