@@ -332,7 +332,10 @@ class Calc1ToNAPI(APIView):
         total_bonus_ratio = convert_sale_to_bonus(current_sfa_reach)
         for index, assign in enumerate(assign_result):
             total_bonus_ratio += convert_sale_to_bonus(float(others[index]))
-        self_ratio = convert_sale_to_bonus(current_sfa_reach) / total_bonus_ratio
+        if total_bonus_ratio == 0:
+            self_ratio = 0
+        else:
+            self_ratio = convert_sale_to_bonus(current_sfa_reach) / total_bonus_ratio
 
         sale_bonus = can_assign_amount * self_ratio * staff.job.job_weight * staff.area.weight
         return Response({
