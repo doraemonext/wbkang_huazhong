@@ -52,3 +52,14 @@ class Calc1ToNView(View):
             'openid': request.GET.get('openid', '')
         })
 
+
+class Calc1To1View(View):
+    """
+    一个R3客户对应一个业务 View
+    """
+    def get(self, request, *args, **kwargs):
+        if not request.session.get('identifier'):
+            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        return render(request, 'wechat/calc_1to1.html', {
+            'openid': request.GET.get('openid', '')
+        })
