@@ -87,7 +87,7 @@ class BonusHistoryAPI(APIView):
         if not history_list.exists():
             return Response({
                 'code': 1,
-                'message': '尚无员工 %s %d 年 %d 月的绩效奖金记录' % (identifier, year, month),
+                'message': '尚无您 %d 年 %d 月的绩效奖金记录' % (year, month),
             }, status=status.HTTP_400_BAD_REQUEST)
 
         history = history_list[0]
@@ -99,6 +99,7 @@ class BonusHistoryAPI(APIView):
                 'job_name': history.job_name,
                 'bonus_base': history.bonus_base,
                 'job_weight': history.job_weight,
+                'area_weight': history.area_weight,
                 'last_month_reach': history.last_month_reach,
                 'current_month_reach': history.current_month_reach,
                 'sfa_reach': history.sfa_reach,
@@ -117,7 +118,10 @@ class BonusHistoryDateListAPI(APIView):
         month_date = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
         res = []
         for i in range(0, 24):
-            res.append('%04d/%02d' % (month_date.year, month_date.month))
+            res.append({
+                'value': '%04d/%02d' % (month_date.year, month_date.month),
+                'text': '%04d 年 %02d 月' % (month_date.year, month_date.month),
+            })
             month_date = month_date.replace(day=1) - datetime.timedelta(days=1)
         return Response({
             'code': 0,

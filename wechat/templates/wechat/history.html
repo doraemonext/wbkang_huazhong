@@ -21,10 +21,7 @@
                     <div class="weui_label" style="padding-left: 15px;">日期</div>
                 </div>
                 <div class="weui_cell_bd weui_cell_primary">
-                    <select class="weui_select">
-                        <option selected="" value="2016/02">2016 年 02 月</option>
-                        <option value="2016/01">2016 年 01 月</option>
-                    </select>
+                    <select class="weui_select" id="datelist"></select>
                 </div>
             </div>
         </div>
@@ -96,12 +93,105 @@
                 <div class="weui_cell_ft">0791-82077663</div>
             </div>
         </div>
+
+        <div id="loadingToast" class="weui_loading_toast" style="display:none;">
+            <div class="weui_mask_transparent"></div>
+            <div class="weui_toast">
+                <div class="weui_loading">
+                    <!-- :) -->
+                    <div class="weui_loading_leaf weui_loading_leaf_0"></div>
+                    <div class="weui_loading_leaf weui_loading_leaf_1"></div>
+                    <div class="weui_loading_leaf weui_loading_leaf_2"></div>
+                    <div class="weui_loading_leaf weui_loading_leaf_3"></div>
+                    <div class="weui_loading_leaf weui_loading_leaf_4"></div>
+                    <div class="weui_loading_leaf weui_loading_leaf_5"></div>
+                    <div class="weui_loading_leaf weui_loading_leaf_6"></div>
+                    <div class="weui_loading_leaf weui_loading_leaf_7"></div>
+                    <div class="weui_loading_leaf weui_loading_leaf_8"></div>
+                    <div class="weui_loading_leaf weui_loading_leaf_9"></div>
+                    <div class="weui_loading_leaf weui_loading_leaf_10"></div>
+                    <div class="weui_loading_leaf weui_loading_leaf_11"></div>
+                </div>
+                <p class="weui_toast_content">数据加载中</p>
+            </div>
+        </div>
     </body>
 
     <script src="{% static "assets/js/jquery.min.js" %}"></script>
     <script src="{% static "assets/js/app.js" %}"></script>
     <script>
         jQuery(document).ready(function () {
+            $('#datelist').on('change', function () {
+                $('#name').html('');
+                $('#job_name').html('');
+                $('#bonus_base').html('');
+                $('#job_weight').html('');
+                $('#area_weight').html('');
+                $('#last_month_reach').html('');
+                $('#current_month_reach').html('');
+                $('#sfa_reach').html('');
+                $('#sale_bonus').html('');
+                $('#exam_bonus').html('');
+                $('#total_bonus').html('');
+                $('.weui_loading_toast').css('display', 'block');
+
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    url: '/api/history',
+                    cache: false,
+                    data: {
+                        'date': this.value
+                    },
+                    success: function (data) {
+                        data = data['data'];
+                        $('#name').html(data['name']);
+                        $('#job_name').html(data['job_name']);
+                        $('#bonus_base').html(data['bonus_base'] + " 元");
+                        $('#job_weight').html(data['job_weight']);
+                        $('#area_weight').html(data['area_weight']);
+                        $('#last_month_reach').html(data['last_month_reach'] * 100 + "%");
+                        $('#current_month_reach').html(data['current_month_reach'] * 100 + "%");
+                        $('#sfa_reach').html(data['sfa_reach'] * 100 + "%");
+                        $('#sale_bonus').html(data['sale_bonus'] + " 元");
+                        $('#exam_bonus').html(data['exam_bonus'] + " 元");
+                        $('#total_bonus').html(data['total_bonus'] + " 元");
+                        $('.weui_loading_toast').css('display', 'none');
+                    },
+                    error: function (xhr) {
+                        var data = $.parseJSON(xhr.responseText);
+                        if (!data.hasOwnProperty('code')) {
+                            if (data.hasOwnProperty('date')) {
+                                alert('日期不合法');
+                            }
+                        } else if (data.hasOwnProperty('message')) {
+                            alert(data['message']);
+                        } else {
+                            alert('系统错误');
+                        }
+                        $('.weui_loading_toast').css('display', 'none');
+                    }
+                });
+            });
+
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: '/api/history_datelist',
+                cache: false,
+                success: function (data) {
+                    var datelist = data['data'];
+                    datelist_select = $('#datelist')
+                    for (var i = 0; i < datelist.length; i++) {
+                        datelist_select.append($('<option></option>').attr("value", datelist[i]["value"]).text(datelist[i]["text"]))
+                    }
+                    datelist_select.val(datelist[1]["value"]);
+                    datelist_select.trigger('change');
+                },
+                error: function (xhr) {
+                    alert('系统错误');
+                }
+            });
         });
     </script>
 </html>
