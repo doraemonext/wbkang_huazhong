@@ -78,7 +78,7 @@
                         <label class="weui_label weui_label_big">客户上月达成率(%)</label>
                     </div>
                     <div class="weui_cell_bd weui_cell_primary">
-                        <input class="weui_input" type="text" placeholder="范围 0 - 100">
+                        <input class="weui_input" type="text" placeholder="请输入达成率" id="last_month_reach">
                     </div>
                 </div>
                 <div class="weui_cell">
@@ -86,14 +86,14 @@
                         <label class="weui_label weui_label_big">本月出货金额</label>
                     </div>
                     <div class="weui_cell_bd weui_cell_primary">
-                        <input class="weui_input" type="text" placeholder="请输入金额 (元)">
+                        <input class="weui_input" type="text" placeholder="请输入金额 (元)" id="current_month_money">
                     </div>
                 </div>
                 <div class="weui_cell">
                     <div class="weui_cell_bd weui_cell_primary">
                         <p>R3 客户本月出货达成率</p>
                     </div>
-                    <div class="weui_cell_ft">
+                    <div class="weui_cell_ft" id="current_month_reach">
                         ... %
                     </div>
                 </div>
@@ -102,14 +102,14 @@
                         <label class="weui_label weui_label_big">个人本月 SFA 金额</label>
                     </div>
                     <div class="weui_cell_bd weui_cell_primary">
-                        <input class="weui_input" type="text" placeholder="请输入金额 (元)">
+                        <input class="weui_input" type="text" placeholder="请输入金额 (元)" id="current_sfa_money">
                     </div>
                 </div>
                 <div class="weui_cell">
                     <div class="weui_cell_bd weui_cell_primary">
                         <p>个人本月 SFA 金额达成率</p>
                     </div>
-                    <div class="weui_cell_ft">
+                    <div class="weui_cell_ft" id="current_sfa_reach">
                         ... %
                     </div>
                 </div>
@@ -136,6 +136,48 @@
     <script src="{% static "assets/js/app.js" %}"></script>
     <script>
         jQuery(document).ready(function () {
+            function get_current_reach_percent () {
+                var client_target = $('#client_target').html();
+                var last_month_reach = $('#last_month_reach').val();
+                var current_month_money = $('#current_month_money').val();
+
+                if (last_month_reach.length == 0 || current_month_money.length == 0) {
+                    return NaN;
+                }
+                client_target = parseFloat(client_target);
+                last_month_reach = parseFloat(last_month_reach);
+                current_month_money = parseFloat(current_month_money);
+                if (isNaN(client_target) || isNaN(last_month_reach) || isNaN(current_month_money)) {
+                    return NaN;
+                }
+
+                var current_month_reach = current_month_money / client_target;
+                if (last_month_reach < 60.0 && current_month_reach > 0.8) {
+                    current_month_reach = 0.8;
+                } else if (last_month_reach < 70.0 && current_month_reach > 1.0) {
+                    current_month_reach = 1.0;
+                } else if (last_month_reach < 80.0 && current_month_reach > 1.2) {
+                    current_month_reach = 1.2;
+                }
+                return current_month_reach;
+            }
+
+            function get_current_sfa_percent() {
+                var target = $('#target').html();
+                var current_sfa_money = $('#current_sfa_money').val();
+
+                if (current_sfa_money.length == 0) {
+                    return NaN;
+                }
+                target = parseFloat(target);
+                current_sfa_money = parseFloat(current_sfa_money);
+                if (isNaN(target) || isNaN(current_sfa_money)) {
+                    return NaN;
+                }
+
+                return current_sfa_money / target;
+            }
+
             $.ajax({
                 type: 'GET',
                 dataType: 'json',
@@ -157,7 +199,7 @@
                         $('#assign').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 岗位</p></div><div class="weui_cell_ft">' + assign[i]['job_name'] + '</div></div>');
                         $('#assign').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 姓名</p></div><div class="weui_cell_ft">' + assign[i]['name'] + '</div></div>');
                         $('#assign').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 金额</p></div><div class="weui_cell_ft">' + assign[i]['target'] + ' 元</div></div>');
-                        $('#reach_percent').after('<div class="weui_cell"><div class="weui_cell_bd"><label class="weui_label weui_label_big">' + assign[i]['name'] + '达成率 (%)</label></div><div class="weui_cell_bd weui_cell_primary"><input class="weui_input" type="text" id="reach_percent_' + assign[i]['identifier'] + '" placeholder="范围 0 - 100"></div></div>');
+                        $('#reach_percent').after('<div class="weui_cell"><div class="weui_cell_bd"><label class="weui_label weui_label_big">' + assign[i]['name'] + '达成率 (%)</label></div><div class="weui_cell_bd weui_cell_primary"><input class="weui_input" type="text" id="reach_percent_' + assign[i]['identifier'] + '" placeholder="请输入达成率"></div></div>');
                     }
                 },
                 error: function (xhr) {
@@ -168,6 +210,31 @@
                         alert('系统错误');
                     }
                     window.history.go(-1);
+                }
+            });
+
+            $('#last_month_reach').on('change', function () {
+                var res = get_current_reach_percent();
+                if (isNaN(res)) {
+                    $('#current_month_reach').html("... %");
+                } else {
+                    $('#current_month_reach').html((res * 100).toFixed(2) + " %");
+                }
+            });
+            $('#current_month_money').on('change', function () {
+                var res = get_current_reach_percent();
+                if (isNaN(res)) {
+                    $('#current_month_reach').html("... %");
+                } else {
+                    $('#current_month_reach').html((res * 100).toFixed(2) + " %");
+                }
+            });
+            $('#current_sfa_money').on('change', function () {
+                var res = get_current_sfa_percent();
+                if (isNaN(res)) {
+                    $('#current_sfa_reach').html("... %");
+                } else {
+                    $('#current_sfa_reach').html((res * 100).toFixed(2) + " %");
                 }
             });
         });
