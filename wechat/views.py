@@ -48,7 +48,7 @@ class ProcessorView(View):
         if isinstance(basic.message, TextMessage):
             message = basic.get_message()
             if message.content == "绩效":
-                return HttpResponse(basic.response_text(settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source))
+                return HttpResponse(basic.response_text("<a href=\"%s\">点击此处计算绩效</a>" % settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source))
         return HttpResponse(basic.response_none())
 
 
