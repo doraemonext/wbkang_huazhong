@@ -199,11 +199,8 @@ class BonusHistory(models.Model):
 
     def save(self, *args, **kwargs):
         if self.staff is not None:
-            status = self.staff.get_status()
             self.name = self.staff.name
             self.job_name = self.staff.job.name
-            if status == Staff.STATUS_TRIAL:
-                self.job_name += ' (试用期)'
             self.bonus_base = self.staff.job.bonus_base
             self.job_weight = self.staff.job.job_weight
             self.area_weight = self.staff.area.weight

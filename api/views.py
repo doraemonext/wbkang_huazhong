@@ -6,8 +6,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from api.serializers import LoginServializer
-from perf.models import Staff
+from api.serializers import LoginServializer, BonusHistorySerializer
+from perf.models import Staff, BonusHistory
 
 
 class LoginAPI(APIView):
@@ -59,4 +59,49 @@ class LoginAPI(APIView):
             'code': 0,
             'identifier': identifier,
             'message': '',
+        }, status=status.HTTP_200_OK)
+
+
+class BonusHistoryAPI(APIView):
+    """
+    奖金历史记录 API
+    """
+    serializer_class = BonusHistorySerializer
+
+    def get(self, request, *args, **kwargs):
+        identifier = request.session.get('identifier')
+        if not identifier:
+            return Response({
+                'code': -1,
+                'message': '尚未登录'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.serializer_class(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        year = serializer.validated_data['year']
+        month = serializer.validated_data['month']
+
+        history_list = BonusHistory.objects.filter(year=year, month=month, staff__identifier=identifier)
+        if not history_list.exists():
+            return Response({
+                'code': 1,
+                'message': '尚无员工 %s %d 年 %d 月的绩效奖金记录' % (identifier, year, month),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        history = history_list[0]
+        return Response({
+            'code': 0,
+            'message': '',
+            'data': {
+                'name': history.name,
+                'job_name': history.job_name,
+                'bonus_base': history.bonus_base,
+                'job_weight': history.job_weight,
+                'last_month_reach': history.last_month_reach,
+                'current_month_reach': history.current_month_reach,
+                'sfa_reach': history.sfa_reach,
+                'sale_bonus': history.sale_bonus,
+                'exam_bonus': history.exam_bonus,
+                'total_bonus': history.sale_bonus + history.exam_bonus,
+            }
         }, status=status.HTTP_200_OK)
