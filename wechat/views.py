@@ -75,3 +75,15 @@ class CalcNTo1View(View):
         return render(request, 'wechat/calc_nto1.html', {
             'openid': request.GET.get('openid', '')
         })
+
+
+class HistoryView(View):
+    """
+    奖励明细 View
+    """
+    def get(self, request, *args, **kwargs):
+        if not request.session.get('identifier'):
+            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        return render(request, 'wechat/history.html', {
+            'openid': request.GET.get('openid', '')
+        })

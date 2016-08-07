@@ -6,7 +6,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
         <title>康师傅奖金计算 - 功能选择</title>
-        <link href="//cdn.bootcss.com/weui/0.4.3/style/weui.css" rel="stylesheet">
+        <link href="{% static "assets/css/weui.css" %}" rel="stylesheet">
         <link href="{% static "assets/css/style.css" %}" rel="stylesheet">
     </head>
     <body>
@@ -15,11 +15,11 @@
         </div>
         <div class="padding">
             <a href="{% url "wechat:calc_selector" %}?openid={{ openid }}" class="weui_btn weui_btn_primary">个人销售达成奖励测算</a>
-            <a href="" class="weui_btn weui_btn_primary">个人销售达成奖励明细</a>
+            <a href="{% url "wechat:history" %}?openid={{ openid }}" class="weui_btn weui_btn_primary">个人销售达成奖励明细</a>
         </div>
     </body>
 
-    <script src="//cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
+    <script src="{% static "assets/js/jquery.min.js" %}"></script>
     <script src="{% static "assets/js/app.js" %}"></script>
     <script>
         jQuery(document).ready(function () {});

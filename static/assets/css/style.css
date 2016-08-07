@@ -288,3 +288,7 @@ body {
     position: absolute;
     right: 1px;
 }
+
+.weui_select{
+    padding-left: 0;
+}
