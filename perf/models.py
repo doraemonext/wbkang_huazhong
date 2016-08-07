@@ -178,6 +178,11 @@ class BonusHistory(models.Model):
     year = models.IntegerField('年')
     month = models.IntegerField('月')
     staff = models.ForeignKey(Staff, verbose_name='员工')
+    name = models.CharField('姓名', max_length=100, default='')
+    job_name = models.CharField('岗位名称', max_length=100, default='')
+    bonus_base = models.FloatField('奖金基数(元)', default=0)
+    job_weight = models.FloatField('职务权数', default=0)
+    area_weight = models.FloatField('地区权数', default=0)
     last_month_reach = models.FloatField('上月客户达成率', help_text='取值范围 0 - 1')
     current_month_reach = models.FloatField('本月客户达成率', help_text='取值范围 0 - 1')
     sfa_reach = models.FloatField('SFA回单达成系数占比', help_text='取值范围 0 - 1')
@@ -189,6 +194,18 @@ class BonusHistory(models.Model):
             raise ValidationError('年月不合法')
         if self.pk is None and BonusHistory.objects.filter(year=self.year, month=self.month, staff=self.staff).exists():
             raise ValidationError('员工 %s 的 %d 年 %d 月奖金历史记录已存在, 请返回上一页搜索' % (self.staff, self.year, self.month))
+
+    def save(self, *args, **kwargs):
+        if self.staff is not None:
+            self.name = self.staff.name
+            self.job_name = self.staff.job.name
+            status = self.staff.get_status()
+            if status == Staff.STATUS_TRIAL:
+                self.job_name += ' (试用期)'
+            self.bonus_base = self.staff.job.bonus_base
+            self.job_weight = self.staff.job.job_weight
+            self.area_weight = self.staff.area.weight
+        super(BonusHistory, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return "%s %d-%d" % (self.staff, self.year, self.month)

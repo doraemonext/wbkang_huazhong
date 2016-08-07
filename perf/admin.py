@@ -34,6 +34,7 @@ class JobAdmin(admin.ModelAdmin):
 
 class StaffAdmin(admin.ModelAdmin):
     list_display = ('identifier', 'name', 'gender', 'department', 'job', 'area', 'entry_date', 'cost_center', 'department_desc', 'cost_center_number', 'status_verbose', 'has_bound')
+    readonly_fields = ('identifier', )
 
     def status_verbose(self, obj):
         status = obj.get_status()
@@ -103,7 +104,8 @@ class StaffTargetAdmin(admin.ModelAdmin):
 
 
 class BonusHistoryAdmin(admin.ModelAdmin):
-    list_display = ('date', 'staff', 'last_month_reach_percent', 'current_month_reach_percent', 'sfa_reach_percent', 'sale_bonus', 'exam_bonus', 'total_bonus')
+    exclude = ('name', 'job_name', 'bonus_base', 'job_weight', 'area_weight')
+    list_display = ('date', 'name', 'job_name', 'bonus_base', 'job_weight', 'area_weight', 'last_month_reach_percent', 'current_month_reach_percent', 'sfa_reach_percent', 'sale_bonus', 'exam_bonus', 'total_bonus')
 
     def date(self, obj):
         return "%d年%d月" % (obj.year, obj.month)

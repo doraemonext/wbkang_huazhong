@@ -57,6 +57,7 @@
                     },
                     success: function (data) {
                         alert("登录成功");
+                        window.location.href = "{% url "wechat:main_selector" %}?openid={{ openid }}";
                     },
                     error: function (xhr) {
                         var data = $.parseJSON(xhr.responseText);
