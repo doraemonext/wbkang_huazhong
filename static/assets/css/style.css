@@ -275,3 +275,7 @@ body {
     -webkit-animation: b .25s forwards;
     animation: b .25s forwards
 }
+
+.padding{
+  padding: 15px;
+}

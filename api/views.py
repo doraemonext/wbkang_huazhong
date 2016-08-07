@@ -51,6 +51,7 @@ class LoginAPI(APIView):
                 'message': '该员工已绑定过其他微信账户, 请联系管理员删除绑定'
             }, status=status.HTTP_400_BAD_REQUEST)
 
+        request.session['identifier'] = identifier
         if len(staff.openid) == 0:
             staff.openid = openid
             staff.save()
