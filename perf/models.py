@@ -15,7 +15,6 @@ class Area(MPTTModel):
     parent = TreeForeignKey('self', verbose_name='父地区', null=True, blank=True, related_name='children', db_index=True)
     name = models.CharField('名称', max_length=100)
     weight = models.FloatField('地区权数', blank=True, null=True)
-    order = models.PositiveIntegerField()
 
     def __unicode__(self):
         res = self.name
@@ -24,7 +23,7 @@ class Area(MPTTModel):
         return res
 
     class MPTTMeta:
-        order_insertion_by = ['order']
+        order_insertion_by = ['id']
 
     class Meta:
         db_table = 'perf_area'
