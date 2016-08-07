@@ -8,8 +8,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from api.serializers import LoginServializer, BonusHistorySerializer
+from api.serializers import LoginServializer, BonusHistorySerializer, Calc1ToNSerializer
 from perf.models import Staff, BonusHistory, ClientTarget, StaffTarget, Staff
+from api.utils import convert_sale_to_bonus
 
 
 class LoginAPI(APIView):
@@ -113,6 +114,8 @@ class Info1ToNAPI(APIView):
         for s in slist:
             if s.staff.identifier == identifier:
                 continue
+            if s.staff.job.name != staff.job.name:
+                continue
             assign_result.append({
                 'identifier': s.staff.identifier,
                 'job_name': s.staff.job.name,
@@ -132,6 +135,95 @@ class Info1ToNAPI(APIView):
                 'client_target': client_target.target,
                 'assign': assign_result,
             },
+        }, status=status.HTTP_200_OK)
+
+
+class Calc1ToNAPI(APIView):
+    """
+    计算 一个客户多个业务 API
+    """
+    serializer_class = Calc1ToNSerializer
+
+    def post(self, request, *args, **kwargs):
+        identifier = request.session.get('identifier')
+        if not identifier:
+            return Response({
+                'code': -1,
+                'message': '尚未登录'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        staff_list = Staff.objects.filter(identifier=identifier)
+        if not staff_list.exists():
+            return Response({
+                'code': 1,
+                'message': '员工 %s 不存在' % identifier,
+            }, status=status.HTTP_400_BAD_REQUEST)
+        staff = staff_list[0]
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        current_client_reach = serializer.validated_data['current_client_reach']
+        current_sfa_reach = serializer.validated_data['current_sfa_reach']
+        others = serializer.validated_data['others']
+
+        today = datetime.date.today()
+        year = today.year
+        month = today.month
+        staff_target_list = StaffTarget.objects.filter(staff=staff, client_target__year=year, client_target__month=month)
+        if not staff_target_list.exists():
+            return Response({
+                'code': 2,
+                'message': '您本月没有任何目标客户',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if len(staff_target_list) > 1:
+            return Response({
+                'code': 3,
+                'message': '您本月有一个以上的目标客户, 非此类别, 请返回重新选择',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        staff_target = staff_target_list[0]
+        client_target = staff_target.client_target
+
+        slist = StaffTarget.objects.filter(client_target=client_target)
+        if len(slist) <= 1:
+            return Response({
+                'code': 4,
+                'message': '您本月对应的目标客户为一对一类型, 非此类别, 请返回重新选择',
+            })
+
+        assign_result = []
+        for s in slist:
+            if s.staff.identifier == identifier:
+                continue
+            if s.staff.job.name != staff.job.name:
+                continue
+            assign_result.append({
+                'identifier': s.staff.identifier,
+                'job_name': s.staff.job.name,
+                'name': s.staff.name,
+                'target': s.target,
+            })
+
+        # Begin to calculate
+        # 销售奖金分配总额
+        can_assign_amount = (len(assign_result) + 1) * current_client_reach * staff.job.bonus_base
+        if staff.get_status() == Staff.STATUS_TRIAL:
+            can_assign_amount *= staff.job.trial_sale_target
+        else:
+            can_assign_amount *= staff.job.sale_target
+
+        # 奖金系数占比
+        total_bonus_ratio = convert_sale_to_bonus(current_sfa_reach)
+        for index, assign in enumerate(assign_result):
+            total_bonus_ratio += convert_sale_to_bonus(float(others[index]))
+        self_ratio = convert_sale_to_bonus(current_sfa_reach) / total_bonus_ratio
+
+        sale_bonus = can_assign_amount * self_ratio * staff.job.job_weight * staff.area.weight
+        return Response({
+            'code': 0,
+            'message': '',
+            'data': {
+                'sale_bonus': sale_bonus,
+            }
         }, status=status.HTTP_200_OK)
 
 

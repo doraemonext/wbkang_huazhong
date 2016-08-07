@@ -116,14 +116,15 @@
                 <div id="reach_percent" style="display: none"></div>
             </div>
             <br/>
-            <a href="javascript:;" class="weui_btn weui_btn_primary">计算奖金</a>
+            <input type="hidden" id="others" value=""/>
+            <a href="javascript:;" class="weui_btn weui_btn_primary" id="calc">计算奖金</a>
             <div class="weui_cells_title">测算结果</div>
             <div class="weui_cells">
                 <div class="weui_cell">
                     <div class="weui_cell_bd weui_cell_primary">
                         <p>本月个人奖金金额</p>
                     </div>
-                    <div class="weui_cell_ft">
+                    <div class="weui_cell_ft" id="sale_bonus">
                         ... 元
                     </div>
                 </div>
@@ -136,6 +137,8 @@
     <script src="{% static "assets/js/app.js" %}"></script>
     <script>
         jQuery(document).ready(function () {
+            var others = [];
+
             function get_current_reach_percent () {
                 var client_target = $('#client_target').html();
                 var last_month_reach = $('#last_month_reach').val();
@@ -200,6 +203,7 @@
                         $('#assign').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 姓名</p></div><div class="weui_cell_ft">' + assign[i]['name'] + '</div></div>');
                         $('#assign').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 金额</p></div><div class="weui_cell_ft">' + assign[i]['target'] + ' 元</div></div>');
                         $('#reach_percent').after('<div class="weui_cell"><div class="weui_cell_bd"><label class="weui_label weui_label_big">' + assign[i]['name'] + '达成率 (%)</label></div><div class="weui_cell_bd weui_cell_primary"><input class="weui_input" type="text" id="reach_percent_' + assign[i]['identifier'] + '" placeholder="请输入达成率"></div></div>');
+                        others.push("reach_percent_" + assign[i]['identifier']);
                     }
                 },
                 error: function (xhr) {
@@ -236,6 +240,54 @@
                 } else {
                     $('#current_sfa_reach').html((res * 100).toFixed(2) + " %");
                 }
+            });
+
+            $('#calc').on('click', function () {
+                var current_client_reach = get_current_reach_percent();
+                var current_sfa_reach = get_current_sfa_percent();
+                var others_str = "";
+                if (isNaN(current_client_reach) || isNaN(current_sfa_reach)) {
+                    alert("输入数据不合法, 请确定输入是否正确");
+                    return;
+                }
+                for (var i = 0; i < others.length; i++) {
+                    var tmp = $('#' + others[i]).val();
+                    tmp = parseFloat(tmp);
+                    if (isNaN(tmp)) {
+                        alert("输入数据不合法, 请确定输入是否正确");
+                        return;
+                    }
+                    tmp = tmp / 100.0;
+                    if (i == 0) {
+                        others_str += tmp.toString();
+                    } else {
+                        others_str += "," + tmp.toString();
+                    }
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    url: '/api/calc1ton',
+                    cache: false,
+                    data: {
+                        'current_client_reach': current_client_reach,
+                        'current_sfa_reach': current_sfa_reach,
+                        'others': others_str
+                    },
+                    success: function (data) {
+                        data = data['data'];
+                        $('#sale_bonus').html(data['sale_bonus'].toFixed(2) + " 元");
+                    },
+                    error: function (xhr) {
+                        var data = $.parseJSON(xhr.responseText);
+                        if (data.hasOwnProperty('message')) {
+                            alert(data['message']);
+                        } else {
+                            alert('系统错误');
+                        }
+                    }
+                });
             });
         });
     </script>

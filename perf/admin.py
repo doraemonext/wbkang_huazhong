@@ -42,7 +42,6 @@ class JobAdmin(admin.ModelAdmin):
 
 class StaffAdmin(admin.ModelAdmin):
     list_display = ('identifier', 'name', 'gender', 'department', 'job', 'area', 'entry_date', 'cost_center', 'department_desc', 'cost_center_number', 'status_verbose', 'has_bound')
-    readonly_fields = ('identifier', )
 
     def status_verbose(self, obj):
         status = obj.get_status()
