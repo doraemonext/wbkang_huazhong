@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from api.serializers import LoginServializer, BonusHistorySerializer, Calc1ToNSerializer
+from api.serializers import LoginServializer, BonusHistorySerializer, Calc1ToNSerializer, Calc1To1Serializer
 from perf.models import Staff, BonusHistory, ClientTarget, StaffTarget, Staff
 from api.utils import convert_sale_to_bonus
 
@@ -276,6 +276,74 @@ class Calc1ToNAPI(APIView):
         self_ratio = convert_sale_to_bonus(current_sfa_reach) / total_bonus_ratio
 
         sale_bonus = can_assign_amount * self_ratio * staff.job.job_weight * staff.area.weight
+        return Response({
+            'code': 0,
+            'message': '',
+            'data': {
+                'sale_bonus': sale_bonus,
+            }
+        }, status=status.HTTP_200_OK)
+
+
+class Calc1To1API(APIView):
+    """
+    计算 一个客户一个业务 API
+    """
+    serializer_class = Calc1To1Serializer
+
+    def post(self, request, *args, **kwargs):
+        identifier = request.session.get('identifier')
+        if not identifier:
+            return Response({
+                'code': -1,
+                'message': '尚未登录'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        staff_list = Staff.objects.filter(identifier=identifier)
+        if not staff_list.exists():
+            return Response({
+                'code': 1,
+                'message': '员工 %s 不存在' % identifier,
+            }, status=status.HTTP_400_BAD_REQUEST)
+        staff = staff_list[0]
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        current_client_reach = serializer.validated_data['current_client_reach']
+
+        today = datetime.date.today()
+        year = today.year
+        month = today.month
+        staff_target_list = StaffTarget.objects.filter(staff=staff, client_target__year=year, client_target__month=month)
+        if not staff_target_list.exists():
+            return Response({
+                'code': 2,
+                'message': '您本月没有任何目标客户',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if len(staff_target_list) > 1:
+            return Response({
+                'code': 3,
+                'message': '您本月有一个以上的目标客户, 非此类别, 请返回重新选择',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        staff_target = staff_target_list[0]
+        client_target = staff_target.client_target
+
+        slist = StaffTarget.objects.filter(client_target=client_target)
+        if len(slist) > 1:
+            return Response({
+                'code': 4,
+                'message': '您本月对应的目标客户为一对多类型, 非此类别, 请返回重新选择',
+            })
+
+        # Begin to calculate
+        # 销售奖金分配总额
+        can_assign_amount = current_client_reach * staff.job.bonus_base
+        if staff.get_status() == Staff.STATUS_TRIAL:
+            can_assign_amount *= staff.job.trial_sale_target
+        else:
+            can_assign_amount *= staff.job.sale_target
+
+        sale_bonus = can_assign_amount * staff.job.job_weight * staff.area.weight
         return Response({
             'code': 0,
             'message': '',
