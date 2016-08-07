@@ -1,0 +1,111 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <title>康师傅奖金计算</title>
+        <link rel="shortcut icon" href="{% static "assets/img/favicon.png" %}"/>
+        <link href="{% static "assets/css/preload.css" %}" rel="stylesheet">
+        <link href="{% static "assets/css/vendors.css" %}" rel="stylesheet">
+        <link href="{% static "assets/css/syntaxhighlighter/shCore.css" %}" rel="stylesheet">
+        <link href="{% static "assets/css/style-blue.css" %}" rel="stylesheet" title="default">
+        <link href="{% static "assets/css/width-full.css" %}" rel="stylesheet" title="default">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+        <script src="{% static "assets/js/html5shiv.min.js" %}"></script>
+        <script src="{% static "assets/js/respond.min.js" %}"></script>
+    <![endif]-->
+    </head>
+
+    <!-- Preloader -->
+    <div id="preloader">
+        <div id="status">&nbsp;</div>
+    </div>
+
+    <body>
+        <div class="paper-back-full">
+            <div class="login-form-full">
+                <div class="fix-box">
+                    <div class="transparent-div no-padding animated fadeInUp animation-delay-8">
+                        <ul class="nav nav-tabs nav-tabs-transparent">
+                            <li class="active"><a href="#home" data-toggle="tab">登录</a></li>
+                        </ul>
+
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="home">
+                                <form role="form">
+                                    <div class="form-group">
+                                        <div class="input-group login-input">
+                                            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                            <input type="text" class="form-control" placeholder="员工号" name="identifier" id="identifier">
+                                        </div>
+                                        <br>
+                                        <div class="input-group login-input">
+                                            <span class="input-group-addon"><i class="fa fa-lock"></i></span>
+                                            <input type="password" class="form-control" placeholder="密码" name="password" id="password">
+                                        </div>
+                                        <input type="hidden" name="openid" id="openid" value="{{ openid }}"/>
+                                        <br/>
+                                        <button type="button" class="btn btn-ar btn-primary pull-right" id="submit">登录</button>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="{% static "assets/js/vendors.js" %}"></script>
+        <script src="{% static "assets/js/syntaxhighlighter/shCore.js" %}"></script>
+        <script src="{% static "assets/js/syntaxhighlighter/shBrushXml.js" %}"></script>
+        <script src="{% static "assets/js/syntaxhighlighter/shBrushJScript.js" %}"></script>
+        <script src="{% static "assets/js/app.js" %}"></script>
+        <script src="{% static "assets/js/home_login_full.js" %}"></script>
+
+        <script>
+            jQuery(document).ready(function () {
+                var openid = "{{ openid }}";
+                $('#submit').click(function () {
+                    $.ajax({
+                        type: 'POST',
+                        dataType: 'json',
+                        url: '/api/login',
+                        cache: false,
+                        data: {
+                            identifier: $('#identifier').val(),
+                            password: $('#password').val(),
+                            openid: $('#openid').val()
+                        },
+                        success: function (data) {
+                            alert("登录成功");
+                        },
+                        error: function (xhr) {
+                            var data = $.parseJSON(xhr.responseText);
+                            if (!data.hasOwnProperty('code')) {
+                                if (data.hasOwnProperty('identifier')) {
+                                    alert('员工号不能为空');
+                                } else if (data.hasOwnProperty('password')) {
+                                    alert('密码不能为空');
+                                } else if (data.hasOwnProperty('openid')) {
+                                    alert('必须从微信界面打开');
+                                }
+                            } else if (data.hasOwnProperty('message')) {
+                                alert(data['message']);
+                            } else {
+                                alert('系统错误');
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>

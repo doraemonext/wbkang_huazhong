@@ -48,8 +48,8 @@ class LoginAPI(APIView):
             return Response({
                 'code': 3,
                 'identifier': identifier,
-                'message': '该员工已绑定过其他微信账户, 请联系管理员'
-            })
+                'message': '该员工已绑定过其他微信账户, 请联系管理员删除绑定'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         if len(staff.openid) == 0:
             staff.openid = openid

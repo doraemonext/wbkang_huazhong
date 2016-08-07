@@ -9,5 +9,6 @@ class LoginView(View):
     登录 View
     """
     def get(self, request, *args, **kwargs):
-        return render(request, 'wechat/login.html')
-    
+        return render(request, 'wechat/login.html', {
+            'openid': request.GET.get('openid', '')
+        })
