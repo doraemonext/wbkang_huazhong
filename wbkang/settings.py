@@ -49,6 +49,8 @@ INSTALLED_APPS = (
     'mptt',
     'rest_framework',
     'perf',
+    'api',
+    'wechat',
 )
 
 MIDDLEWARE_CLASSES = (
