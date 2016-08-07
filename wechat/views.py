@@ -1,8 +1,55 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
+from django.conf import settings
+from django.http.response import HttpResponse
+from wechat_sdk import WechatBasic, WechatConf
+from wechat_sdk.messages import TextMessage
+
+
+class ProcessorView(View):
+    """
+    控制中心 View
+    """
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ProcessorView, self).dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        signature = request.GET.get('signature')
+        timestamp = request.GET.get('timestamp')
+        nonce = request.GET.get('nonce')
+        echostr = request.GET.get('echostr')
+
+        conf = WechatConf(appid=settings.WECHAT_APPID, appsecret=settings.WECHAT_APPSECRET, token=settings.WECHAT_TOKEN, encrypt_mode='normal')
+        basic = WechatBasic(conf=conf)
+        if basic.check_signature(signature=signature, timestamp=timestamp, nonce=nonce):
+            return HttpResponse(echostr)
+        else:
+            return HttpResponse("ERROR CHECK SIGNATURE")
+
+    def post(self, request, *args, **kwargs):
+        signature = request.GET.get('signature')
+        timestamp = request.GET.get('timestamp')
+        nonce = request.GET.get('nonce')
+
+        conf = WechatConf(appid=settings.WECHAT_APPID, appsecret=settings.WECHAT_APPSECRET, token=settings.WECHAT_TOKEN, encrypt_mode='normal')
+        basic = WechatBasic(conf=conf)
+        if not basic.check_signature(signature=signature, timestamp=timestamp, nonce=nonce):
+            return HttpResponse("ERROR CHECK SIGNATURE")
+
+        basic.parse_data(request.body)
+        if isinstance(basic.message, TextMessage):
+            message = basic.get_message()
+            if message.content == "绩效":
+                return HttpResponse(basic.response_text(settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source))
+        return HttpResponse(basic.response_text("未定义命令"))
 
 
 class LoginView(View):

@@ -147,3 +147,9 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny'
     ]
 }
+
+# Wechat
+BASE_URL = 'http://testwechat.doraemonext.com'
+WECHAT_APPID = 'wxu9lhdxrtgsjqjihf'
+WECHAT_APPSECRET = 'xpftzb2m3ibejxhs6wrocjyhvaf78z0l'
+WECHAT_TOKEN = 'test_token'
