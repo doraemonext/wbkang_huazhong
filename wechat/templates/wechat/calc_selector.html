@@ -5,23 +5,29 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
-        <title>康师傅奖金计算 - 功能选择</title>
+        <title>康师傅奖金计算 - 奖励测算选择</title>
         <link href="//cdn.bootcss.com/weui/0.4.3/style/weui.css" rel="stylesheet">
         <link href="{% static "assets/css/style.css" %}" rel="stylesheet">
     </head>
     <body>
         <div class="hd">
-            <h1 class="page_title">功能选择</h1>
+            <h1 class="page_title">奖励测算选择</h1>
         </div>
         <div class="padding">
-            <a href="{% url "wechat:calc_selector" %}?openid={{ openid }}" class="weui_btn weui_btn_primary">个人销售达成奖励测算</a>
-            <a href="" class="weui_btn weui_btn_primary">个人销售达成奖励明细</a>
+            <a href="javascript:;" class="weui_btn weui_btn_primary">一个 R3 客户对应多个业务</a>
+            <a href="javascript:;" class="weui_btn weui_btn_primary">一个 R3 客户对应一个业务</a>
+            <a href="javascript:;" class="weui_btn weui_btn_primary">多个 R3 客户对应一个业务</a>
         </div>
     </body>
 
     <script src="//cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
     <script src="{% static "assets/js/app.js" %}"></script>
     <script>
-        jQuery(document).ready(function () {});
+        jQuery(document).ready(function () {
+            var openid = "{{ openid }}";
+            $('#submit').on('click', function (e) {
+
+            });
+        });
     </script>
 </html>
