@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from api.serializers import LoginServializer, BonusHistorySerializer
-from perf.models import Staff, BonusHistory
+from perf.models import Staff, BonusHistory, ClientTarget, StaffTarget, Staff
 
 
 class LoginAPI(APIView):
@@ -61,6 +61,77 @@ class LoginAPI(APIView):
             'code': 0,
             'identifier': identifier,
             'message': '',
+        }, status=status.HTTP_200_OK)
+
+
+class Info1ToNAPI(APIView):
+    """
+    信息查询 一个客户多个业务 API
+    """
+    def get(self, request, *args, **kwargs):
+        identifier = request.session.get('identifier')
+        if not identifier:
+            return Response({
+                'code': -1,
+                'message': '尚未登录'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        print(identifier)
+
+        staff_list = Staff.objects.filter(identifier=identifier)
+        if not staff_list.exists():
+            return Response({
+                'code': 1,
+                'message': '员工 %s 不存在' % identifier,
+            }, status=status.HTTP_400_BAD_REQUEST)
+        staff = staff_list[0]
+
+        today = datetime.date.today()
+        year = today.year
+        month = today.month
+        staff_target_list = StaffTarget.objects.filter(staff=staff, client_target__year=year, client_target__month=month)
+        if not staff_target_list.exists():
+            return Response({
+                'code': 2,
+                'message': '您本月没有任何目标客户',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if len(staff_target_list) > 1:
+            return Response({
+                'code': 3,
+                'message': '您本月有一个以上的目标客户, 非此类别, 请返回重新选择',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        staff_target = staff_target_list[0]
+        client_target = staff_target.client_target
+
+        slist = StaffTarget.objects.filter(client_target=client_target)
+        if len(slist) <= 1:
+            return Response({
+                'code': 4,
+                'message': '您本月对应的目标客户为一对一类型, 非此类别, 请返回重新选择',
+            })
+
+        assign_result = []
+        for s in slist:
+            if s.staff.identifier == identifier:
+                continue
+            assign_result.append({
+                'identifier': s.staff.identifier,
+                'job_name': s.staff.job.name,
+                'name': s.staff.name,
+                'target': s.target,
+            })
+        return Response({
+            'code': 0,
+            'message': '',
+            'data': {
+                'date': "%04d 年 %02d 月" % (year, month),
+                'name': staff.name,
+                'job_name': staff.job.name,
+                'target': staff_target.target,
+                'client_name': client_target.client.name,
+                'client_identifier': client_target.client.identifier,
+                'client_target': client_target.target,
+                'assign': assign_result,
+            },
         }, status=status.HTTP_200_OK)
 
 
