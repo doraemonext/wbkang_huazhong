@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+import datetime
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -104,4 +106,21 @@ class BonusHistoryAPI(APIView):
                 'exam_bonus': history.exam_bonus,
                 'total_bonus': history.sale_bonus + history.exam_bonus,
             }
+        }, status=status.HTTP_200_OK)
+
+
+class BonusHistoryDateListAPI(APIView):
+    """
+    奖金历史记录日期列表 API
+    """
+    def get(self, request, *args, **kwargs):
+        month_date = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+        res = []
+        for i in range(0, 24):
+            res.append('%04d/%02d' % (month_date.year, month_date.month))
+            month_date = month_date.replace(day=1) - datetime.timedelta(days=1)
+        return Response({
+            'code': 0,
+            'message': '',
+            'data': res,
         }, status=status.HTTP_200_OK)
