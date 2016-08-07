@@ -33,7 +33,7 @@ class JobAdmin(admin.ModelAdmin):
 
 
 class StaffAdmin(admin.ModelAdmin):
-    list_display = ('identifier', 'name', 'gender', 'department', 'job', 'area', 'entry_date', 'cost_center', 'department_desc', 'cost_center_number', 'status_verbose')
+    list_display = ('identifier', 'name', 'gender', 'department', 'job', 'area', 'entry_date', 'cost_center', 'department_desc', 'cost_center_number', 'status_verbose', 'has_bound')
 
     def status_verbose(self, obj):
         status = obj.get_status()
@@ -44,6 +44,13 @@ class StaffAdmin(admin.ModelAdmin):
         else:
             return "离职"
 
+    def has_bound(self, obj):
+        if len(obj.openid) > 0:
+            return "是"
+        else:
+            return "否"
+
+    has_bound.short_description = '绑定'
     status_verbose.short_description = '状态'
 
     def suit_row_attributes(self, obj, request):

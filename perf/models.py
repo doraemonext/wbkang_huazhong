@@ -90,6 +90,7 @@ class Staff(models.Model):
     department_desc = models.CharField('部门描述', max_length=200)
     cost_center_number = models.CharField('成本中心码', max_length=100)
     status = models.IntegerField('员工状态', choices=STATUS)
+    openid = models.CharField('微信绑定ID', max_length=255, default='', blank=True, help_text='修改此处将导致原绑定无效')
 
     def __unicode__(self):
         return self.name + ' (' + self.identifier + ')'
