@@ -1,0 +1,95 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <title>康师傅奖金计算</title>
+
+        <link rel="shortcut icon" href="{% static "assets/img/favicon.png" %}"/>
+        <link href="{% static "assets/css/preload.css" %}" rel="stylesheet">
+        <link href="{% static "assets/css/vendors.css" %}" rel="stylesheet">
+        <link href="{% static "assets/css/syntaxhighlighter/shCore.css" %}" rel="stylesheet">
+        <link href="{% static "assets/css/style-blue.css" %}" rel="stylesheet" title="default">
+        <link href="{% static "assets/css/width-full.css" %}" rel="stylesheet" title="default">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+        <script src="{% static "assets/js/html5shiv.min.js" %}"></script>
+        <script src="{% static "assets/js/respond.min.js" %}"></script>
+    <![endif]-->
+    </head>
+
+    <!-- Preloader -->
+    <div id="preloader">
+        <div id="status">&nbsp;</div>
+    </div>
+
+    <body>
+        <div id="sb-site">
+            <div class="boxed">
+                <nav class="navbar navbar-default navbar-header-full yamm navbar-static-top" role="navigation" id="header">
+                    <div class="container">
+                        <!-- Brand and toggle get grouped for better mobile display -->
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                                <span class="sr-only">Toggle navigation</span>
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <a id="ar-brand" class="navbar-brand hidden-lg hidden-md hidden-sm" href="#">康师傅奖金计算</a>
+                        </div> <!-- navbar-header -->
+
+                        <!-- Collect the nav links, forms, and other content for toggling -->
+                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                            <ul class="nav navbar-nav">
+                                <li class="dropdown">
+                                    <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">Home</a>
+                                    <ul class="dropdown-menu dropdown-menu-left">
+                                        <li><a href="index.html">Option 1: Default</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div><!-- navbar-collapse -->
+                    </div><!-- container -->
+                </nav>
+
+                <header class="main-header">
+                    <div class="container">
+                        <h3 class="page-title">功能选择</h3>
+
+                        <ol class="breadcrumb pull-right">
+                            <li><a href="#">UI Elements</a></li>
+                            <li><a href="#">Buttons</a></li>
+                            <li class="active">Buttons Library</li>
+                        </ol>
+                    </div>
+                </header>
+
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <section class="css-section">
+                                <br>
+                                <a href="#" class="button button-block button-rounded button-large">个人销售达成奖励测算</a>
+                                <br>
+                                <a href="#" class="button button-block button-rounded button-large">个人销售达成奖励明细</a>
+                            </section>
+                          </div>
+                    </div>
+                </div>
+            </div> <!-- boxed -->
+        </div> <!-- sb-site -->
+
+        <div id="back-top">
+            <a href="#header"><i class="fa fa-chevron-up"></i></a>
+        </div>
+        <script src="{% static "assets/js/vendors.js" %}"></script>
+        <script src="{% static "assets/js/syntaxhighlighter/shCore.js" %}"></script>
+        <script src="{% static "assets/js/syntaxhighlighter/shBrushXml.js" %}"></script>
+        <script src="{% static "assets/js/syntaxhighlighter/shBrushJScript.js" %}"></script>
+        <script src="{% static "assets/js/app.js" %}"></script>
+    </body>
+</html>

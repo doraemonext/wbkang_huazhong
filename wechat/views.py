@@ -12,3 +12,13 @@ class LoginView(View):
         return render(request, 'wechat/login.html', {
             'openid': request.GET.get('openid', '')
         })
+
+
+class MainSelectorView(View):
+    """
+    主选择器 View
+    """
+    def get(self, request, *args, **kwargs):
+        return render(request, 'wechat/main_selector.html', {
+            'openid': request.GET.get('openid', '')
+        })
