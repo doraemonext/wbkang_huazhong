@@ -45,10 +45,15 @@ class ProcessorView(View):
             return HttpResponse("ERROR CHECK SIGNATURE")
 
         basic.parse_data(request.body)
-        if isinstance(basic.message, TextMessage):
-            message = basic.get_message()
+        message = basic.get_message()
+        if isinstance(message, TextMessage):
             if message.content == "绩效":
-                return HttpResponse(basic.response_text("<a href='%s'>点击此处计算绩效</a>" % (settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source)))
+                return HttpResponse(basic.response_text("<a href='%s'>点击此处计算绩效</a>" % (
+                settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source)))
+        elif isinstance(message, EventMessage):
+            if message.key == "绩效":
+                return HttpResponse(basic.response_text("<a href='%s'>点击此处计算绩效</a>" % (
+                settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source)))
         return HttpResponse(basic.response_none())
 
 
