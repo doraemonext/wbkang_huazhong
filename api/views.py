@@ -339,7 +339,7 @@ class Calc1ToNAPI(APIView):
             'code': 0,
             'message': '',
             'data': {
-                'sale_bonus': sale_bonus,
+                'sale_bonus': sale_bonus if current_client_reach >= 0.8 else 0.0,
             }
         }, status=status.HTTP_200_OK)
 
