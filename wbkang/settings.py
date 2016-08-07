@@ -117,6 +117,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/www/wbkang/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
@@ -150,6 +151,6 @@ REST_FRAMEWORK = {
 
 # Wechat
 BASE_URL = 'http://testwechat.doraemonext.com'
-WECHAT_APPID = 'wxu9lhdxrtgsjqjihf'
-WECHAT_APPSECRET = 'xpftzb2m3ibejxhs6wrocjyhvaf78z0l'
+WECHAT_APPID = 'wxa81b377716e65e59'
+WECHAT_APPSECRET = 'dec5b806b243713f15b2c92c22bca512'
 WECHAT_TOKEN = 'test_token'
