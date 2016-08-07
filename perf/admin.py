@@ -2,17 +2,14 @@
 
 from __future__ import unicode_literals
 
-from suit.admin import SortableModelAdmin
 from mptt.admin import MPTTModelAdmin
 from django.contrib import admin
 from perf.models import Area, Job, Staff, Client, ClientTarget, StaffTarget, BonusHistory
 
 
-class AreaAdmin(MPTTModelAdmin, SortableModelAdmin):
+class AreaAdmin(MPTTModelAdmin):
     mptt_level_indent = 20
     list_display = ('name', 'weight')
-
-    sortable = 'order'
 
 
 class JobAdmin(admin.ModelAdmin):
