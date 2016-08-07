@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.http.response import HttpResponse
 from wechat_sdk import WechatBasic, WechatConf
-from wechat_sdk.messages import TextMessage
+from wechat_sdk.messages import TextMessage, EventMessage
 
 
 class ProcessorView(View):
@@ -49,7 +49,7 @@ class ProcessorView(View):
             message = basic.get_message()
             if message.content == "绩效":
                 return HttpResponse(basic.response_text(settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source))
-        return HttpResponse(basic.response_text("未定义命令"))
+        return HttpResponse(basic.response_none())
 
 
 class LoginView(View):
