@@ -16,7 +16,7 @@ class AreaAdmin(MPTTModelAdmin, SortableModelAdmin):
 
 
 class JobAdmin(admin.ModelAdmin):
-    list_display = ('name', 'bonus_base', 'job_weight', 'sale_target_percent', 'exam_target_percent', 'profit_target_percent', 'has_trial')
+    list_display = ('name', 'bonus_base', 'job_weight', 'sale_target_percent', 'exam_target_percent', 'profit_target_percent', 'has_trial', 'trial_sale_target_percent', 'trial_exam_target_percent')
 
     def sale_target_percent(self, obj):
         return "%d%%" % (obj.sale_target * 100)
@@ -27,9 +27,17 @@ class JobAdmin(admin.ModelAdmin):
     def profit_target_percent(self, obj):
         return "%d%%" % (obj.profit_target * 100)
 
+    def trial_sale_target_percent(self, obj):
+        return "%d%%" % (obj.trial_sale_target * 100)
+
+    def trial_exam_target_percent(self, obj):
+        return "%d%%" % (obj.trial_exam_target * 100)
+
     sale_target_percent.short_description = '销售指标'
     exam_target_percent.short_description = '考核指标'
     profit_target_percent.short_description = '利润达成指标'
+    trial_sale_target_percent.short_description = '试用期销售指标'
+    trial_exam_target_percent.short_description = '试用期考核指标'
 
 
 class StaffAdmin(admin.ModelAdmin):

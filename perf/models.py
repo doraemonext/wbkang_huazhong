@@ -48,6 +48,8 @@ class Job(models.Model):
     profit_target = models.FloatField('利润达成指标', default=0, help_text='取值范围 0 - 1')
     has_trial = models.BooleanField('存在试用期', default=False)
     trial_days = models.IntegerField('试用期时长(天)', help_text='仅在存在试用期时有效', default=180)
+    trial_sale_target = models.FloatField('试用期销售指标', help_text='仅在存在试用期时有效, 取值范围 0 - 1', default=0)
+    trial_exam_target = models.FloatField('试用期考核指标', help_text='仅在存在试用期时有效, 取值范围 0 - 1', default=0)
 
     def __unicode__(self):
         return self.name
@@ -197,9 +199,9 @@ class BonusHistory(models.Model):
 
     def save(self, *args, **kwargs):
         if self.staff is not None:
+            status = self.staff.get_status()
             self.name = self.staff.name
             self.job_name = self.staff.job.name
-            status = self.staff.get_status()
             if status == Staff.STATUS_TRIAL:
                 self.job_name += ' (试用期)'
             self.bonus_base = self.staff.job.bonus_base
