@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from api.serializers import LoginServializer, BonusHistorySerializer, Calc1ToNSerializer, Calc1To1Serializer
+from api.serializers import LoginServializer, BonusHistorySerializer, Calc1ToNSerializer, Calc1To1Serializer, CalcNTo1Serializer
 from perf.models import Staff, BonusHistory, ClientTarget, StaffTarget, Staff
 from api.utils import convert_sale_to_bonus
 
@@ -196,6 +196,65 @@ class Info1To1API(APIView):
         }, status=status.HTTP_200_OK)
 
 
+class InfoNTo1API(APIView):
+    """
+    信息查询 多个客户一个业务 API
+    """
+    def get(self, request, *args, **kwargs):
+        identifier = request.session.get('identifier')
+        if not identifier:
+            return Response({
+                'code': -1,
+                'message': '尚未登录'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        staff_list = Staff.objects.filter(identifier=identifier)
+        if not staff_list.exists():
+            return Response({
+                'code': 1,
+                'message': '员工 %s 不存在' % identifier,
+            }, status=status.HTTP_400_BAD_REQUEST)
+        staff = staff_list[0]
+
+        today = datetime.date.today()
+        year = today.year
+        month = today.month
+        staff_target_list = StaffTarget.objects.filter(staff=staff, client_target__year=year, client_target__month=month)
+        if not staff_target_list.exists():
+            return Response({
+                'code': 2,
+                'message': '您本月没有任何目标客户',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if len(staff_target_list) <= 1:
+            return Response({
+                'code': 3,
+                'message': '您本月没有一个以上的目标客户, 非此类别, 请返回重新选择',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        client_target_list = []
+        total_target = 0
+        for staff_target in staff_target_list:
+            total_target += staff_target.client_target.target
+            client_target_list.append({
+                'client_name': staff_target.client_target.client.name,
+                'client_identifier': staff_target.client_target.client.identifier,
+                'client_target': staff_target.client_target.target,
+            })
+
+        return Response({
+            'code': 0,
+            'message': '',
+            'data': {
+                'date': "%04d 年 %02d 月" % (year, month),
+                'name': staff.name,
+                'job_name': staff.job.name,
+                'target': total_target,
+                'client_target': total_target,
+                'client_target_list': client_target_list,
+            },
+        }, status=status.HTTP_200_OK)
+
+
 class Calc1ToNAPI(APIView):
     """
     计算 一个客户多个业务 API
@@ -333,6 +392,75 @@ class Calc1To1API(APIView):
             return Response({
                 'code': 4,
                 'message': '您本月对应的目标客户为一对多类型, 非此类别, 请返回重新选择',
+            })
+
+        # Begin to calculate
+        # 销售奖金分配总额
+        can_assign_amount = current_client_reach * staff.job.bonus_base
+        if staff.get_status() == Staff.STATUS_TRIAL:
+            can_assign_amount *= staff.job.trial_sale_target
+        else:
+            can_assign_amount *= staff.job.sale_target
+
+        sale_bonus = can_assign_amount * staff.job.job_weight * staff.area.weight
+        return Response({
+            'code': 0,
+            'message': '',
+            'data': {
+                'sale_bonus': sale_bonus,
+            }
+        }, status=status.HTTP_200_OK)
+
+
+class CalcNTo1API(APIView):
+    """
+    计算 多个客户一个业务 API
+    """
+    serializer_class = CalcNTo1Serializer
+
+    def post(self, request, *args, **kwargs):
+        identifier = request.session.get('identifier')
+        if not identifier:
+            return Response({
+                'code': -1,
+                'message': '尚未登录'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        staff_list = Staff.objects.filter(identifier=identifier)
+        if not staff_list.exists():
+            return Response({
+                'code': 1,
+                'message': '员工 %s 不存在' % identifier,
+            }, status=status.HTTP_400_BAD_REQUEST)
+        staff = staff_list[0]
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        current_client_reach = serializer.validated_data['current_client_reach']
+
+        today = datetime.date.today()
+        year = today.year
+        month = today.month
+        staff_target_list = StaffTarget.objects.filter(staff=staff, client_target__year=year, client_target__month=month)
+        if not staff_target_list.exists():
+            return Response({
+                'code': 2,
+                'message': '您本月没有任何目标客户',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if len(staff_target_list) <= 1:
+            return Response({
+                'code': 3,
+                'message': '您本月没有一个以上的目标客户, 非此类别, 请返回重新选择',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        client_target_list = []
+        total_target = 0
+        for staff_target in staff_target_list:
+            total_target += staff_target.client_target.target
+            client_target_list.append({
+                'client_name': staff_target.client_target.client.name,
+                'client_identifier': staff_target.client_target.client.identifier,
+                'client_target': staff_target.client_target.target,
             })
 
         # Begin to calculate

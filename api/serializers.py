@@ -26,6 +26,10 @@ class Calc1To1Serializer(serializers.Serializer):
     current_client_reach = serializers.FloatField(required=True)
 
 
+class CalcNTo1Serializer(serializers.Serializer):
+    current_client_reach = serializers.FloatField(required=True)
+
+
 class BonusHistorySerializer(serializers.Serializer):
     date = serializers.CharField(max_length=10, required=True, allow_blank=False)
 
