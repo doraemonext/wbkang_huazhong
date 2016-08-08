@@ -98,7 +98,7 @@ class Staff(models.Model):
     gender = models.IntegerField('性别', choices=GENDER)
     department = models.CharField('部门', max_length=100)
     job = models.ForeignKey(Job, verbose_name='岗位')
-    job_name = models.CharField('岗位名称', max_length=100)
+    job_name = models.CharField('岗位名称', max_length=100, blank=True)
     area = TreeForeignKey(Area, verbose_name='地区')
     entry_date = models.DateField('入职日期')
     cost_center = models.CharField('成本中心', max_length=100)

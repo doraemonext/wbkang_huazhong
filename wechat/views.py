@@ -11,6 +11,7 @@ from django.conf import settings
 from django.http.response import HttpResponse
 from wechat_sdk import WechatBasic, WechatConf
 from wechat_sdk.messages import TextMessage, EventMessage
+from perf.models import Staff
 
 
 class ProcessorView(View):
@@ -62,8 +63,12 @@ class LoginView(View):
     登录 View
     """
     def get(self, request, *args, **kwargs):
-        if request.session.get('identifier'):
-            return redirect(reverse('wechat:main_selector') + '?openid=' + request.GET.get('openid', ''))
+        identifier = request.session.get('identifier')
+        if identifier:
+            openid = request.GET.get('openid', '')
+            staff = Staff.objects.filter(identifier=identifier)
+            if staff.exists() and staff[0].openid == openid:
+                return redirect(reverse('wechat:main_selector') + '?openid=' + request.GET.get('openid', ''))
         return render(request, 'wechat/login.html', {
             'openid': request.GET.get('openid', '')
         })
@@ -74,8 +79,14 @@ class MainSelectorView(View):
     主选择器 View
     """
     def get(self, request, *args, **kwargs):
-        if not request.session.get('identifier'):
+        identifier = request.session.get('identifier')
+        if not identifier:
             return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        openid = request.GET.get('openid', '')
+        staff = Staff.objects.filter(identifier=identifier)
+        if not staff.exists() or staff[0].openid != openid:
+            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+
         return render(request, 'wechat/main_selector.html', {
             'openid': request.GET.get('openid', '')
         })
@@ -86,8 +97,14 @@ class CalcSelectorView(View):
     奖励测算选择器 View
     """
     def get(self, request, *args, **kwargs):
-        if not request.session.get('identifier'):
+        identifier = request.session.get('identifier')
+        if not identifier:
             return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        openid = request.GET.get('openid', '')
+        staff = Staff.objects.filter(identifier=identifier)
+        if not staff.exists() or staff[0].openid != openid:
+            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+
         return render(request, 'wechat/calc_selector.html', {
             'openid': request.GET.get('openid', '')
         })
@@ -98,8 +115,14 @@ class Calc1ToNView(View):
     一个R3客户对应多个业务 View
     """
     def get(self, request, *args, **kwargs):
-        if not request.session.get('identifier'):
+        identifier = request.session.get('identifier')
+        if not identifier:
             return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        openid = request.GET.get('openid', '')
+        staff = Staff.objects.filter(identifier=identifier)
+        if not staff.exists() or staff[0].openid != openid:
+            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+
         return render(request, 'wechat/calc_1ton.html', {
             'openid': request.GET.get('openid', '')
         })
@@ -110,8 +133,14 @@ class Calc1To1View(View):
     一个R3客户对应一个业务 View
     """
     def get(self, request, *args, **kwargs):
-        if not request.session.get('identifier'):
+        identifier = request.session.get('identifier')
+        if not identifier:
             return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        openid = request.GET.get('openid', '')
+        staff = Staff.objects.filter(identifier=identifier)
+        if not staff.exists() or staff[0].openid != openid:
+            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+
         return render(request, 'wechat/calc_1to1.html', {
             'openid': request.GET.get('openid', '')
         })
@@ -122,8 +151,14 @@ class CalcNTo1View(View):
     N个R3客户对应一个业务 View
     """
     def get(self, request, *args, **kwargs):
-        if not request.session.get('identifier'):
+        identifier = request.session.get('identifier')
+        if not identifier:
             return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        openid = request.GET.get('openid', '')
+        staff = Staff.objects.filter(identifier=identifier)
+        if not staff.exists() or staff[0].openid != openid:
+            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+
         return render(request, 'wechat/calc_nto1.html', {
             'openid': request.GET.get('openid', '')
         })
@@ -134,8 +169,14 @@ class HistoryView(View):
     奖励明细 View
     """
     def get(self, request, *args, **kwargs):
-        if not request.session.get('identifier'):
+        identifier = request.session.get('identifier')
+        if not identifier:
             return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        openid = request.GET.get('openid', '')
+        staff = Staff.objects.filter(identifier=identifier)
+        if not staff.exists() or staff[0].openid != openid:
+            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+
         return render(request, 'wechat/history.html', {
             'openid': request.GET.get('openid', '')
         })
