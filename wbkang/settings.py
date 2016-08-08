@@ -132,6 +132,7 @@ SUIT_CONFIG = {
         {'label': '奖金计算', 'icon': 'icon-leaf', 'models': (
             'perf.area',
             'perf.job',
+            'perf.jobmatch',
             'perf.staff',
             'perf.client',
             'perf.clienttarget',

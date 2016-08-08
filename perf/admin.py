@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from mptt.admin import MPTTModelAdmin
 from django.contrib import admin
-from perf.models import Area, Job, Staff, Client, ClientTarget, StaffTarget, BonusHistory
+from perf.models import Area, Job, JobMatch, Staff, Client, ClientTarget, StaffTarget, BonusHistory
 
 
 class AreaAdmin(MPTTModelAdmin):
@@ -37,8 +37,12 @@ class JobAdmin(admin.ModelAdmin):
     trial_exam_target_percent.short_description = '试用期考核指标'
 
 
+class JobMatchAdmin(admin.ModelAdmin):
+    list_display = ('name', 'job')
+
+
 class StaffAdmin(admin.ModelAdmin):
-    list_display = ('identifier', 'name', 'gender', 'department', 'job', 'area', 'entry_date', 'cost_center', 'department_desc', 'cost_center_number', 'status_verbose', 'has_bound')
+    list_display = ('identifier', 'name', 'gender', 'department', 'job', 'job_name', 'area', 'entry_date', 'cost_center', 'department_desc', 'cost_center_number', 'status_verbose', 'has_bound')
 
     def status_verbose(self, obj):
         status = obj.get_status()
@@ -140,6 +144,7 @@ class BonusHistoryAdmin(admin.ModelAdmin):
 admin.site.empty_value_display = '无'
 admin.site.register(Area, AreaAdmin)
 admin.site.register(Job, JobAdmin)
+admin.site.register(JobMatch, JobMatchAdmin)
 admin.site.register(Staff, StaffAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(ClientTarget, ClientTargetAdmin)

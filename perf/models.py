@@ -56,6 +56,23 @@ class Job(models.Model):
         ordering = ['-id']
 
 
+class JobMatch(models.Model):
+    """
+    岗位对应名称 Model
+    """
+    name = models.CharField('详细名称', max_length=100, unique=True)
+    job = models.ForeignKey(Job, verbose_name='岗位')
+
+    def __unicode__(self):
+        return self.name + " (" + self.job.name + ")"
+
+    class Meta:
+        db_table = 'perf_job_match'
+        verbose_name = '岗位名称管理'
+        verbose_name_plural = '岗位名称管理'
+        ordering = ['name']
+
+
 class Staff(models.Model):
     """
     员工 Model
@@ -81,6 +98,7 @@ class Staff(models.Model):
     gender = models.IntegerField('性别', choices=GENDER)
     department = models.CharField('部门', max_length=100)
     job = models.ForeignKey(Job, verbose_name='岗位')
+    job_name = models.CharField('岗位名称', max_length=100)
     area = TreeForeignKey(Area, verbose_name='地区')
     entry_date = models.DateField('入职日期')
     cost_center = models.CharField('成本中心', max_length=100)
