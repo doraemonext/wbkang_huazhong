@@ -122,6 +122,9 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 # Django Suit
 SUIT_CONFIG = {
     'ADMIN_NAME': '康师傅奖金计算',
@@ -138,6 +141,7 @@ SUIT_CONFIG = {
             'perf.clienttarget',
             'perf.stafftarget',
             'perf.bonushistory',
+            'perf.dataimport',
         )},
         {'label': '系统用户管理', 'icon': 'icon-lock', 'models': ('auth.user',)},
     )

@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from mptt.admin import MPTTModelAdmin
 from django.contrib import admin
-from perf.models import Area, Job, JobMatch, Staff, Client, ClientTarget, StaffTarget, BonusHistory
+from perf.models import Area, Job, JobMatch, Staff, Client, ClientTarget, StaffTarget, BonusHistory, DataImport
 
 
 class AreaAdmin(MPTTModelAdmin):
@@ -141,6 +141,14 @@ class BonusHistoryAdmin(admin.ModelAdmin):
     total_bonus.short_description = '奖金合计'
 
 
+class DataImportAdmin(admin.ModelAdmin):
+    list_display = ('date', 'create_time')
+
+    def date(self, obj):
+        return "%d年%d月" % (obj.year, obj.month)
+
+    date.short_description = '数据日期'
+
 admin.site.empty_value_display = '无'
 admin.site.register(Area, AreaAdmin)
 admin.site.register(Job, JobAdmin)
@@ -150,3 +158,4 @@ admin.site.register(Client, ClientAdmin)
 admin.site.register(ClientTarget, ClientTargetAdmin)
 admin.site.register(StaffTarget, StaffTargetAdmin)
 admin.site.register(BonusHistory, BonusHistoryAdmin)
+admin.site.register(DataImport, DataImportAdmin)

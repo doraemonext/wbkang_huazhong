@@ -61,7 +61,7 @@ class JobMatch(models.Model):
     岗位对应名称 Model
     """
     name = models.CharField('详细名称', max_length=100, unique=True)
-    job = models.ForeignKey(Job, verbose_name='岗位')
+    job = models.ForeignKey(Job, verbose_name='对应岗位')
 
     def __unicode__(self):
         return self.name + " (" + self.job.name + ")"
@@ -227,3 +227,25 @@ class BonusHistory(models.Model):
         verbose_name = '奖金历史记录'
         verbose_name_plural = '奖金历史记录'
         ordering = ['-id']
+
+
+class DataImport(models.Model):
+    """
+    导入数据 Model
+    """
+    year = models.IntegerField("年")
+    month = models.IntegerField("月")
+    file = models.FileField("Excel 文件")
+    create_time = models.DateTimeField("上传日期", auto_now_add=True)
+
+    def __unicode__(self):
+        return "%d-%d" % (self.year, self.month)
+
+    class Meta:
+        db_table = 'perf_data_import'
+        verbose_name = '数据导入'
+        verbose_name_plural = '数据导入'
+        ordering = ['-year', '-month']
+
+    def save(self, *args, **kwargs):
+        return super(DataImport, self).save(*args, **kwargs)
