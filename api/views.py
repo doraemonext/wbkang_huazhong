@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from api.serializers import LoginServializer, BonusHistorySerializer, Calc1ToNSerializer, Calc1To1Serializer, CalcNTo1Serializer
+from api.serializers import LoginServializer, BonusHistorySerializer, Calc1ToNSerializer, Calc1To1Serializer, CalcNTo1Serializer, Info1To1Serializer, Info1ToNSerializer, InfoNTo1Serializer
 from perf.models import Staff, BonusHistory, ClientTarget, StaffTarget, Staff
 from api.utils import convert_sale_to_bonus
 
@@ -25,13 +25,6 @@ class LoginAPI(APIView):
         identifier = serializer.validated_data['identifier']
         password = serializer.validated_data['password']
         openid = serializer.validated_data['openid']
-
-        if request.session.get('identifier') == identifier:
-            return Response({
-                'code': 0,
-                'identifier': identifier,
-                'message': '',
-            }, status=status.HTTP_200_OK)
 
         staff_list = Staff.objects.filter(identifier=identifier)
         if not staff_list.exists():
@@ -54,7 +47,6 @@ class LoginAPI(APIView):
                 'message': '该员工已绑定过其他微信账户, 请联系管理员删除绑定'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        request.session['identifier'] = identifier
         if len(staff.openid) == 0:
             staff.openid = openid
             staff.save()
@@ -69,19 +61,18 @@ class Info1ToNAPI(APIView):
     """
     信息查询 一个客户多个业务 API
     """
-    def get(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return Response({
-                'code': -1,
-                'message': '尚未登录'
-            }, status=status.HTTP_400_BAD_REQUEST)
+    serializer_class = Info1ToNSerializer
 
-        staff_list = Staff.objects.filter(identifier=identifier)
+    def get(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        openid = serializer.validated_data['openid']
+
+        staff_list = Staff.objects.filter(openid=openid)
         if not staff_list.exists():
             return Response({
                 'code': 1,
-                'message': '员工 %s 不存在' % identifier,
+                'message': '员工不存在',
             }, status=status.HTTP_400_BAD_REQUEST)
         staff = staff_list[0]
 
@@ -111,7 +102,7 @@ class Info1ToNAPI(APIView):
 
         assign_result = []
         for s in slist:
-            if s.staff.identifier == identifier:
+            if s.staff.identifier == staff.identifier:
                 continue
             if s.staff.job.name != staff.job.name:
                 continue
@@ -141,19 +132,18 @@ class Info1To1API(APIView):
     """
     信息查询 一个客户一个业务 API
     """
-    def get(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return Response({
-                'code': -1,
-                'message': '尚未登录'
-            }, status=status.HTTP_400_BAD_REQUEST)
+    serializer_class = Info1To1Serializer
 
-        staff_list = Staff.objects.filter(identifier=identifier)
+    def get(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        openid = serializer.validated_data['openid']
+
+        staff_list = Staff.objects.filter(openid=openid)
         if not staff_list.exists():
             return Response({
                 'code': 1,
-                'message': '员工 %s 不存在' % identifier,
+                'message': '员工不存在',
             }, status=status.HTTP_400_BAD_REQUEST)
         staff = staff_list[0]
 
@@ -200,19 +190,18 @@ class InfoNTo1API(APIView):
     """
     信息查询 多个客户一个业务 API
     """
-    def get(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return Response({
-                'code': -1,
-                'message': '尚未登录'
-            }, status=status.HTTP_400_BAD_REQUEST)
+    serializer_class = InfoNTo1Serializer
 
-        staff_list = Staff.objects.filter(identifier=identifier)
+    def get(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        openid = serializer.validated_data['openid']
+
+        staff_list = Staff.objects.filter(openid=openid)
         if not staff_list.exists():
             return Response({
                 'code': 1,
-                'message': '员工 %s 不存在' % identifier,
+                'message': '员工不存在',
             }, status=status.HTTP_400_BAD_REQUEST)
         staff = staff_list[0]
 
@@ -262,26 +251,20 @@ class Calc1ToNAPI(APIView):
     serializer_class = Calc1ToNSerializer
 
     def post(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return Response({
-                'code': -1,
-                'message': '尚未登录'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        staff_list = Staff.objects.filter(identifier=identifier)
-        if not staff_list.exists():
-            return Response({
-                'code': 1,
-                'message': '员工 %s 不存在' % identifier,
-            }, status=status.HTTP_400_BAD_REQUEST)
-        staff = staff_list[0]
-
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
+        openid = serializer.validated_data['openid']
         current_client_reach = serializer.validated_data['current_client_reach']
         current_sfa_reach = serializer.validated_data['current_sfa_reach']
         others = serializer.validated_data['others']
+
+        staff_list = Staff.objects.filter(openid=openid)
+        if not staff_list.exists():
+            return Response({
+                'code': 1,
+                'message': '员工不存在',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        staff = staff_list[0]
 
         today = datetime.date.today()
         year = today.year
@@ -309,7 +292,7 @@ class Calc1ToNAPI(APIView):
 
         assign_result = []
         for s in slist:
-            if s.staff.identifier == identifier:
+            if s.staff.identifier == staff.identifier:
                 continue
             if s.staff.job.name != staff.job.name:
                 continue
@@ -354,24 +337,18 @@ class Calc1To1API(APIView):
     serializer_class = Calc1To1Serializer
 
     def post(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return Response({
-                'code': -1,
-                'message': '尚未登录'
-            }, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        openid = serializer.validated_data['openid']
+        current_client_reach = serializer.validated_data['current_client_reach']
 
-        staff_list = Staff.objects.filter(identifier=identifier)
+        staff_list = Staff.objects.filter(openid=openid)
         if not staff_list.exists():
             return Response({
                 'code': 1,
-                'message': '员工 %s 不存在' % identifier,
+                'message': '员工不存在',
             }, status=status.HTTP_400_BAD_REQUEST)
         staff = staff_list[0]
-
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        current_client_reach = serializer.validated_data['current_client_reach']
 
         today = datetime.date.today()
         year = today.year
@@ -422,24 +399,18 @@ class CalcNTo1API(APIView):
     serializer_class = CalcNTo1Serializer
 
     def post(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return Response({
-                'code': -1,
-                'message': '尚未登录'
-            }, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        openid = serializer.validated_data['openid']
+        current_client_reach = serializer.validated_data['current_client_reach']
 
-        staff_list = Staff.objects.filter(identifier=identifier)
+        staff_list = Staff.objects.filter(openid=openid)
         if not staff_list.exists():
             return Response({
                 'code': 1,
-                'message': '员工 %s 不存在' % identifier,
+                'message': '员工不存在',
             }, status=status.HTTP_400_BAD_REQUEST)
         staff = staff_list[0]
-
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        current_client_reach = serializer.validated_data['current_client_reach']
 
         today = datetime.date.today()
         year = today.year
@@ -491,19 +462,13 @@ class BonusHistoryAPI(APIView):
     serializer_class = BonusHistorySerializer
 
     def get(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return Response({
-                'code': -1,
-                'message': '尚未登录'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
         serializer = self.serializer_class(data=request.query_params)
         serializer.is_valid(raise_exception=True)
+        openid = serializer.validated_data['openid']
         year = serializer.validated_data['year']
         month = serializer.validated_data['month']
 
-        history_list = BonusHistory.objects.filter(year=year, month=month, staff__identifier=identifier)
+        history_list = BonusHistory.objects.filter(year=year, month=month, staff__openid=openid)
         if not history_list.exists():
             return Response({
                 'code': 1,

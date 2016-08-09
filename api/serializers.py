@@ -11,7 +11,20 @@ class LoginServializer(serializers.Serializer):
     openid = serializers.CharField(required=True, allow_blank=False)
 
 
+class Info1ToNSerializer(serializers.Serializer):
+    openid = serializers.CharField(required=True, allow_blank=False)
+
+
+class Info1To1Serializer(serializers.Serializer):
+    openid = serializers.CharField(required=True, allow_blank=False)
+
+
+class InfoNTo1Serializer(serializers.Serializer):
+    openid = serializers.CharField(required=True, allow_blank=False)
+
+
 class Calc1ToNSerializer(serializers.Serializer):
+    openid = serializers.CharField(required=True, allow_blank=False)
     current_client_reach = serializers.FloatField(required=True)
     current_sfa_reach = serializers.FloatField(required=True)
     others = serializers.CharField(required=True, allow_blank=True)
@@ -23,14 +36,17 @@ class Calc1ToNSerializer(serializers.Serializer):
 
 
 class Calc1To1Serializer(serializers.Serializer):
+    openid = serializers.CharField(required=True, allow_blank=False)
     current_client_reach = serializers.FloatField(required=True)
 
 
 class CalcNTo1Serializer(serializers.Serializer):
+    openid = serializers.CharField(required=True, allow_blank=False)
     current_client_reach = serializers.FloatField(required=True)
 
 
 class BonusHistorySerializer(serializers.Serializer):
+    openid = serializers.CharField(required=True, allow_blank=False)
     date = serializers.CharField(max_length=10, required=True, allow_blank=False)
 
     def validate(self, data):

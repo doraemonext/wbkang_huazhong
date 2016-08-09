@@ -18,6 +18,7 @@
             <a href="{% url "wechat:calc_1to1" %}?openid={{ openid }}" class="weui_btn weui_btn_primary">一个 R3 客户对应一个业务</a>
             <a href="{% url "wechat:calc_nto1" %}?openid={{ openid }}" class="weui_btn weui_btn_primary">多个 R3 客户对应一个业务</a>
         </div>
+        <input type="hidden" name="openid" id="openid" value="{{ openid }}"/>
     </body>
 
     <script src="{% static "assets/js/jquery.min.js" %}"></script>

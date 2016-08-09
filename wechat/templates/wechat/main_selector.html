@@ -17,6 +17,7 @@
             <a href="{% url "wechat:calc_selector" %}?openid={{ openid }}" class="weui_btn weui_btn_primary">销售达成测算</a>
             <a href="{% url "wechat:history" %}?openid={{ openid }}" class="weui_btn weui_btn_primary">月绩效奖金查询</a>
         </div>
+        <input type="hidden" id="openid" name="openid" value="{{ openid }}"/>
     </body>
 
     <script src="{% static "assets/js/jquery.min.js" %}"></script>

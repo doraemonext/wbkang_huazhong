@@ -115,6 +115,7 @@
                 <p class="weui_toast_content">数据加载中</p>
             </div>
         </div>
+        <input type="hidden" name="openid" id="openid" value="{{ openid }}"/>
     </body>
 
     <script src="{% static "assets/js/jquery.min.js" %}"></script>
@@ -141,6 +142,7 @@
                     url: '/api/history',
                     cache: false,
                     data: {
+                        'openid': $('#openid').val(),
                         'date': this.value
                     },
                     success: function (data) {

@@ -131,6 +131,7 @@
             </div>
             <p class="weui_cells_tips">提示: 考核类另算</p>
         </div>
+        <input type="hidden" name="openid" id="openid" value="{{ openid }}"/>
     </body>
 
     <script src="{% static "assets/js/jquery.min.js" %}"></script>
@@ -186,6 +187,9 @@
                 dataType: 'json',
                 url: '/api/info1ton',
                 cache: false,
+                data: {
+                    'openid': $('#openid').val()
+                },
                 success: function (data) {
                     data = data['data'];
 
@@ -199,9 +203,9 @@
 
                     var assign = data['assign'];
                     for (var i = 0; i < assign.length; i++) {
-                        $('#assign').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 岗位</p></div><div class="weui_cell_ft">' + assign[i]['job_name'] + '</div></div>');
-                        $('#assign').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 姓名</p></div><div class="weui_cell_ft">' + assign[i]['name'] + '</div></div>');
-                        $('#assign').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 金额</p></div><div class="weui_cell_ft">' + assign[i]['target'] + ' 元</div></div>');
+                        $('#assign').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i + 1) + ' - 岗位</p></div><div class="weui_cell_ft">' + assign[i]['job_name'] + '</div></div>');
+                        $('#assign').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i + 1) + ' - 姓名</p></div><div class="weui_cell_ft">' + assign[i]['name'] + '</div></div>');
+                        $('#assign').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i + 1) + ' - 金额</p></div><div class="weui_cell_ft">' + assign[i]['target'] + ' 元</div></div>');
                         $('#reach_percent').after('<div class="weui_cell"><div class="weui_cell_bd"><label class="weui_label weui_label_big">' + assign[i]['name'] + '达成率 (%)</label></div><div class="weui_cell_bd weui_cell_primary"><input class="weui_input" type="text" id="reach_percent_' + assign[i]['identifier'] + '" placeholder="请输入达成率"></div></div>');
                         others.push("reach_percent_" + assign[i]['identifier']);
                     }
@@ -271,6 +275,7 @@
                     url: '/api/calc1ton',
                     cache: false,
                     data: {
+                        'openid': $('#openid').val(),
                         'current_client_reach': current_client_reach,
                         'current_sfa_reach': current_sfa_reach,
                         'others': others_str

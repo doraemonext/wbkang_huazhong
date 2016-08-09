@@ -109,6 +109,7 @@
             </div>
             <p class="weui_cells_tips">提示: 考核类另算</p>
         </div>
+        <input type="hidden" name="openid" id="openid" value="{{ openid }}"/>
     </body>
 
     <script src="{% static "assets/js/jquery.min.js" %}"></script>
@@ -142,31 +143,34 @@
             }
 
            $.ajax({
-                type: 'GET',
-                dataType: 'json',
-                url: '/api/info1to1',
-                cache: false,
-                success: function (data) {
-                    data = data['data'];
+               type: 'GET',
+               dataType: 'json',
+               url: '/api/info1to1',
+               cache: false,
+               data: {
+                   'openid': $('#openid').val()
+               },
+               success: function (data) {
+                   data = data['data'];
 
-                    $('#date').html(data['date']);
-                    $('#name').html(data['name']);
-                    $('#job_name').html(data['job_name']);
-                    $('#target').html(data['target'] + " 元");
-                    $('#client_name').html(data['client_name']);
-                    $('#client_identifier').html(data['client_identifier']);
-                    $('#client_target').html(data['client_target'] + " 元");
-                },
-                error: function (xhr) {
-                    var data = $.parseJSON(xhr.responseText);
-                    if (data.hasOwnProperty('message')) {
-                        alert(data['message']);
-                    } else {
-                        alert('系统错误');
-                    }
-                    window.history.go(-1);
-                }
-            });
+                   $('#date').html(data['date']);
+                   $('#name').html(data['name']);
+                   $('#job_name').html(data['job_name']);
+                   $('#target').html(data['target'] + " 元");
+                   $('#client_name').html(data['client_name']);
+                   $('#client_identifier').html(data['client_identifier']);
+                   $('#client_target').html(data['client_target'] + " 元");
+               },
+               error: function (xhr) {
+                   var data = $.parseJSON(xhr.responseText);
+                   if (data.hasOwnProperty('message')) {
+                       alert(data['message']);
+                   } else {
+                       alert('系统错误');
+                   }
+                   window.history.go(-1);
+               }
+           });
 
             $('#last_month_reach').on('change', function () {
                 var res = get_current_reach_percent();
@@ -193,6 +197,7 @@
                     url: '/api/calc1to1',
                     cache: false,
                     data: {
+                        'openid': $('#openid').val(),
                         'current_client_reach': current_client_reach
                     },
                     success: function (data) {

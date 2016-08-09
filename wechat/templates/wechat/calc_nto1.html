@@ -95,6 +95,7 @@
             </div>
             <p class="weui_cells_tips">提示: 考核类另算</p>
         </div>
+        <input type="hidden" name="openid" id="openid" value="{{ openid }}"/>
     </body>
 
     <script src="{% static "assets/js/jquery.min.js" %}"></script>
@@ -132,6 +133,9 @@
                 dataType: 'json',
                 url: '/api/infonto1',
                 cache: false,
+                data: {
+                    'openid': $('#openid').val()
+                },
                 success: function (data) {
                     data = data['data'];
 
@@ -183,6 +187,7 @@
                     url: '/api/calcnto1',
                     cache: false,
                     data: {
+                        'openid': $('#openid').val(),
                         'current_client_reach': current_client_reach
                     },
                     success: function (data) {

@@ -63,15 +63,12 @@ class LoginView(View):
     登录 View
     """
     def get(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if identifier:
-            openid = request.GET.get('openid', '')
-            staff = Staff.objects.filter(identifier=identifier)
-            if staff.exists() and staff[0].openid == openid:
-                return redirect(reverse('wechat:main_selector') + '?openid=' + request.GET.get('openid', ''))
-        return render(request, 'wechat/login.html', {
-            'openid': request.GET.get('openid', '')
-        })
+        openid = request.GET.get('openid', '')
+        staff = Staff.objects.filter(openid=openid)
+        if staff.exists():
+            return redirect(reverse('wechat:main_selector') + '?openid=' + openid)
+
+        return render(request, 'wechat/login.html', {'openid': openid})
 
 
 class MainSelectorView(View):
@@ -79,17 +76,12 @@ class MainSelectorView(View):
     主选择器 View
     """
     def get(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
         openid = request.GET.get('openid', '')
-        staff = Staff.objects.filter(identifier=identifier)
-        if not staff.exists() or staff[0].openid != openid:
-            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        staff = Staff.objects.filter(openid=openid)
+        if not staff.exists():
+            return redirect(reverse('wechat:login') + '?openid=' + openid)
 
-        return render(request, 'wechat/main_selector.html', {
-            'openid': request.GET.get('openid', '')
-        })
+        return render(request, 'wechat/main_selector.html', {'openid': openid})
 
 
 class CalcSelectorView(View):
@@ -97,17 +89,12 @@ class CalcSelectorView(View):
     奖励测算选择器 View
     """
     def get(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
         openid = request.GET.get('openid', '')
-        staff = Staff.objects.filter(identifier=identifier)
-        if not staff.exists() or staff[0].openid != openid:
-            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        staff = Staff.objects.filter(openid=openid)
+        if not staff.exists():
+            return redirect(reverse('wechat:login') + '?openid=' + openid)
 
-        return render(request, 'wechat/calc_selector.html', {
-            'openid': request.GET.get('openid', '')
-        })
+        return render(request, 'wechat/calc_selector.html', {'openid': openid})
 
 
 class Calc1ToNView(View):
@@ -115,17 +102,12 @@ class Calc1ToNView(View):
     一个R3客户对应多个业务 View
     """
     def get(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
         openid = request.GET.get('openid', '')
-        staff = Staff.objects.filter(identifier=identifier)
-        if not staff.exists() or staff[0].openid != openid:
-            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        staff = Staff.objects.filter(openid=openid)
+        if not staff.exists():
+            return redirect(reverse('wechat:login') + '?openid=' + openid)
 
-        return render(request, 'wechat/calc_1ton.html', {
-            'openid': request.GET.get('openid', '')
-        })
+        return render(request, 'wechat/calc_1ton.html', {'openid': openid})
 
 
 class Calc1To1View(View):
@@ -133,17 +115,12 @@ class Calc1To1View(View):
     一个R3客户对应一个业务 View
     """
     def get(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
         openid = request.GET.get('openid', '')
-        staff = Staff.objects.filter(identifier=identifier)
-        if not staff.exists() or staff[0].openid != openid:
-            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        staff = Staff.objects.filter(openid=openid)
+        if not staff.exists():
+            return redirect(reverse('wechat:login') + '?openid=' + openid)
 
-        return render(request, 'wechat/calc_1to1.html', {
-            'openid': request.GET.get('openid', '')
-        })
+        return render(request, 'wechat/calc_1to1.html', {'openid': openid})
 
 
 class CalcNTo1View(View):
@@ -151,17 +128,12 @@ class CalcNTo1View(View):
     N个R3客户对应一个业务 View
     """
     def get(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
         openid = request.GET.get('openid', '')
-        staff = Staff.objects.filter(identifier=identifier)
-        if not staff.exists() or staff[0].openid != openid:
-            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        staff = Staff.objects.filter(openid=openid)
+        if not staff.exists():
+            return redirect(reverse('wechat:login') + '?openid=' + openid)
 
-        return render(request, 'wechat/calc_nto1.html', {
-            'openid': request.GET.get('openid', '')
-        })
+        return render(request, 'wechat/calc_nto1.html', {'openid': openid})
 
 
 class HistoryView(View):
@@ -169,14 +141,9 @@ class HistoryView(View):
     奖励明细 View
     """
     def get(self, request, *args, **kwargs):
-        identifier = request.session.get('identifier')
-        if not identifier:
-            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
         openid = request.GET.get('openid', '')
-        staff = Staff.objects.filter(identifier=identifier)
-        if not staff.exists() or staff[0].openid != openid:
-            return redirect(reverse('wechat:login') + '?openid=' + request.GET.get('openid', ''))
+        staff = Staff.objects.filter(openid=openid)
+        if not staff.exists():
+            return redirect(reverse('wechat:login') + '?openid=' + openid)
 
-        return render(request, 'wechat/history.html', {
-            'openid': request.GET.get('openid', '')
-        })
+        return render(request, 'wechat/history.html', {'openid': openid})
