@@ -305,7 +305,7 @@ class Calc1ToNAPI(APIView):
 
         # Begin to calculate
         # 销售奖金分配总额
-        can_assign_amount = (len(assign_result) + 1) * current_client_reach * staff.job.bonus_base
+        can_assign_amount = (len(assign_result) + 1) * convert_sale_to_bonus(current_client_reach) * staff.job.bonus_base
         if staff.get_status() == Staff.STATUS_TRIAL:
             can_assign_amount *= staff.job.trial_sale_target
         else:
@@ -325,7 +325,7 @@ class Calc1ToNAPI(APIView):
             'code': 0,
             'message': '',
             'data': {
-                'sale_bonus': sale_bonus if current_client_reach >= 0.8 else 0.0,
+                'sale_bonus': sale_bonus,
             }
         }, status=status.HTTP_200_OK)
 
@@ -376,7 +376,7 @@ class Calc1To1API(APIView):
 
         # Begin to calculate
         # 销售奖金分配总额
-        can_assign_amount = current_client_reach * staff.job.bonus_base
+        can_assign_amount = convert_sale_to_bonus(current_client_reach) * staff.job.bonus_base
         if staff.get_status() == Staff.STATUS_TRIAL:
             can_assign_amount *= staff.job.trial_sale_target
         else:
@@ -439,7 +439,7 @@ class CalcNTo1API(APIView):
 
         # Begin to calculate
         # 销售奖金分配总额
-        can_assign_amount = current_client_reach * staff.job.bonus_base
+        can_assign_amount = convert_sale_to_bonus(current_client_reach) * staff.job.bonus_base
         if staff.get_status() == Staff.STATUS_TRIAL:
             can_assign_amount *= staff.job.trial_sale_target
         else:

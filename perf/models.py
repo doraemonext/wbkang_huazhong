@@ -113,7 +113,7 @@ class Staff(models.Model):
     def clean(self):
         if len(self.openid) > 0:
             staff = Staff.objects.filter(openid=self.openid)
-            if staff.exists():
+            if staff.exists() and staff[0].identifier != self.identifier:
                 raise ValidationError('该微信绑定ID已经用于用户 %s (%s)' % (staff[0].name, staff[0].identifier))
 
     def get_status(self):
