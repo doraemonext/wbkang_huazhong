@@ -260,15 +260,11 @@ class StaffDataImport(models.Model):
         verbose_name_plural = '员工信息导入'
         ordering = ['-year', '-month']
 
-    def save(self, *args, **kwargs):
-        return super(StaffDataImport, self).save(*args, **kwargs)
-
 
 def import_staff_data(sender, instance, created, **kwargs):
     if not created:
         return
 
-    # filepath = os.path.join(settings.BASE_DIR, 'media', instance.file.name)
     book = xlrd.open_workbook(instance.file.path)
     length = len(book.sheet_names())
     if length < 1:
@@ -323,21 +319,28 @@ def import_staff_data(sender, instance, created, **kwargs):
             return
         area = area_model[0]
 
-        Staff.objects.get_or_create(
-            identifier=identifier,
-            name=name,
-            password="123456",
-            gender=Staff.GENDER_MALE if gender == "男" else Staff.GENDER_FEMALE,
-            area=area,
-            department=department,
-            job=job,
-            job_name=job_name,
-            entry_date=entry_date,
-            cost_center=cost_center,
-            department_desc=department_desc,
-            cost_center_number=cost_center_number,
-            status=Staff.STATUS_ACTIVE,
-        )
+        try:
+            Staff.objects.get_or_create(
+                identifier=identifier,
+                name=name,
+                password="123456",
+                gender=Staff.GENDER_MALE if gender == "男" else Staff.GENDER_FEMALE,
+                area=area,
+                department=department,
+                job=job,
+                job_name=job_name,
+                entry_date=entry_date,
+                cost_center=cost_center,
+                department_desc=department_desc,
+                cost_center_number=cost_center_number,
+                status=Staff.STATUS_ACTIVE,
+            )
+        except Exception as e:
+            transaction.savepoint_rollback(sid)
+            instance.imported = False
+            instance.message = e.message
+            instance.save()
+            return
 
     transaction.savepoint_commit(sid)
     instance.imported = True
