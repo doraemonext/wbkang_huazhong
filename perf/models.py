@@ -92,7 +92,7 @@ class Staff(models.Model):
     )
     STATUS_TRIAL = 2
 
-    identifier = models.CharField('员工号', max_length=100)
+    identifier = models.CharField('员工号', max_length=100, unique=True)
     password = models.CharField('密码', max_length=64)
     name = models.CharField('姓名', max_length=100)
     gender = models.IntegerField('性别', choices=GENDER)
@@ -109,6 +109,11 @@ class Staff(models.Model):
 
     def __unicode__(self):
         return self.name + ' (' + self.identifier + ')'
+
+    def clean(self):
+        staff = Staff.objects.filter(openid=self.openid)
+        if staff.exists():
+            raise ValidationError('该微信绑定ID已经用于用户 %s (%s)' % (staff[0].name, staff[0].identifier))
 
     def get_status(self):
         if self.status == self.STATUS_ACTIVE:
