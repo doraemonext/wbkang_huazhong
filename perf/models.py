@@ -235,7 +235,7 @@ class BonusHistory(models.Model):
         ordering = ['-id']
 
 
-class DataImport(models.Model):
+class StaffDataImport(models.Model):
     """
     导入数据 Model
     """
@@ -248,10 +248,10 @@ class DataImport(models.Model):
         return "%d-%d" % (self.year, self.month)
 
     class Meta:
-        db_table = 'perf_data_import'
-        verbose_name = '数据导入'
-        verbose_name_plural = '数据导入'
+        db_table = 'perf_staff_data_import'
+        verbose_name = '员工信息导入'
+        verbose_name_plural = '员工信息导入'
         ordering = ['-year', '-month']
 
     def save(self, *args, **kwargs):
-        return super(DataImport, self).save(*args, **kwargs)
+        return super(StaffDataImport, self).save(*args, **kwargs)
