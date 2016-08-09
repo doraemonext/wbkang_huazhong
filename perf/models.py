@@ -246,13 +246,13 @@ class StaffDataImport(models.Model):
     """
     year = models.IntegerField("年")
     month = models.IntegerField("月")
-    file = models.FileField("Excel 文件")
+    file = models.FileField(u"Excel 文件", upload_to=os.path.join(settings.BASE_DIR, "media"))
     imported = models.BooleanField("是否成功导入", default=False)
     message = models.TextField("说明信息", default='')
     create_time = models.DateTimeField("上传日期", auto_now_add=True)
 
     def __unicode__(self):
-        return "%d-%d" % (self.year, self.month)
+        return u"%d-%d" % (self.year, self.month)
 
     class Meta:
         db_table = 'perf_staff_data_import'
