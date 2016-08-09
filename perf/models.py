@@ -349,3 +349,113 @@ def import_staff_data(sender, instance, created, **kwargs):
     instance.save()
 
 signals.post_save.connect(import_staff_data, sender=StaffDataImport)
+
+
+class HistoryDataImport(models.Model):
+    """
+    历史数据导入 Model
+    """
+    year = models.IntegerField("年")
+    month = models.IntegerField("月")
+    file = models.FileField(u"Excel 文件", upload_to=os.path.join(settings.BASE_DIR, "media"))
+    imported = models.BooleanField("是否成功导入", default=False)
+    message = models.TextField("说明信息", default='')
+    create_time = models.DateTimeField("上传日期", auto_now_add=True)
+
+    def __unicode__(self):
+        return smart_unicode("%d-%d" % (self.year, self.month))
+
+    class Meta:
+        db_table = 'perf_history_data_import'
+        verbose_name = '绩效奖金信息导入'
+        verbose_name_plural = '绩效奖金信息导入'
+        ordering = ['-year', '-month']
+
+
+def get_actual_value(sheet, merged_cells, row, col):
+    for cell in merged_cells:
+        if cell[0] <= row < cell[1] and cell[2] <= col < cell[3]:
+            return sheet.cell_value(cell[0], cell[2])
+    return sheet.cell_value(row, col)
+
+
+def import_history_data(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    book = xlrd.open_workbook(instance.file.path)
+    length = len(book.sheet_names())
+    if length < 1:
+        instance.imported = False
+        instance.message = "至少需要一个 Sheet"
+        instance.save()
+        return
+
+    sheet = book.sheet_by_index(0)
+    nrows = sheet.nrows
+    ncols = sheet.ncols
+    merged_cells = sheet.merged_cells
+    print(merged_cells)
+    if nrows <= 3:
+        instance.imported = False
+        instance.message = "数据文件不足 3 行"
+        instance.save()
+        return
+    if ncols != 25:
+        instance.imported = False
+        instance.message = "数据文件列数不为 25"
+        instance.save()
+        return
+
+    sid = transaction.savepoint()
+    for row in range(3, nrows):
+        valid_staff = True
+        identifier = None
+        staff = None
+        try:
+            identifier = str(int(sheet.cell_value(row, 2)))
+            if not identifier:
+                valid_staff = False
+        except ValueError:
+            valid_staff = False
+        if not valid_staff:
+            continue
+        try:
+            staff = Staff.objects.get(identifier=identifier)
+        except Exception as e:
+            transaction.savepoint_rollback(sid)
+            instance.imported = False
+            instance.message = "员工号 %s 不存在, 无法导入, 错误信息: %s" % (identifier, e.message)
+            instance.save()
+            return
+
+        last_month_reach = get_actual_value(sheet, merged_cells, row, 10)
+        current_month_reach = get_actual_value(sheet, merged_cells, row, 13)
+        sfa_reach = get_actual_value(sheet, merged_cells, row, 20)
+        sale_bonus = get_actual_value(sheet, merged_cells, row, 21)
+        exam_bonus = get_actual_value(sheet, merged_cells, row, 23)
+
+        try:
+            BonusHistory.objects.get_or_create(
+                year=instance.year,
+                month=instance.month,
+                staff=staff,
+                last_month_reach=last_month_reach,
+                current_month_reach=current_month_reach,
+                sfa_reach=sfa_reach,
+                sale_bonus=sale_bonus,
+                exam_bonus=exam_bonus,
+            )
+        except Exception as e:
+            transaction.savepoint_rollback(sid)
+            instance.imported = False
+            instance.message = e.message
+            instance.save()
+            return
+
+    transaction.savepoint_commit(sid)
+    instance.imported = True
+    instance.message = "导入成功, 共导入 %d 个绩效奖金数据" % (nrows - 3)
+    instance.save()
+
+signals.post_save.connect(import_history_data, sender=HistoryDataImport)

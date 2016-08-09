@@ -142,6 +142,7 @@ SUIT_CONFIG = {
             'perf.stafftarget',
             'perf.bonushistory',
             'perf.staffdataimport',
+            'perf.historydataimport',
         )},
         {'label': '系统用户管理', 'icon': 'icon-lock', 'models': ('auth.user',)},
     )

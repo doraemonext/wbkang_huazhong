@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from mptt.admin import MPTTModelAdmin
 from django.contrib import admin
-from perf.models import Area, Job, JobMatch, Staff, Client, ClientTarget, StaffTarget, BonusHistory, StaffDataImport
+from perf.models import Area, Job, JobMatch, Staff, Client, ClientTarget, StaffTarget, BonusHistory, StaffDataImport, HistoryDataImport
 
 
 class AreaAdmin(MPTTModelAdmin):
@@ -113,7 +113,7 @@ class StaffTargetAdmin(admin.ModelAdmin):
 
 class BonusHistoryAdmin(admin.ModelAdmin):
     exclude = ('name', 'job_name', 'bonus_base', 'job_weight', 'area_weight')
-    list_display = ('date', 'staff_name', 'job_name', 'bonus_base', 'job_weight', 'area_weight', 'last_month_reach_percent', 'current_month_reach_percent', 'sfa_reach_percent', 'sale_bonus', 'exam_bonus', 'total_bonus')
+    list_display = ('date', 'staff_name', 'job_name', 'bonus_base', 'job_weight', 'area_weight', 'last_month_reach_percent', 'current_month_reach_percent', 'sfa_reach_percent', 'sale_bonus_disp', 'exam_bonus_disp', 'total_bonus')
 
     def date(self, obj):
         return "%d年%d月" % (obj.year, obj.month)
@@ -130,18 +130,36 @@ class BonusHistoryAdmin(admin.ModelAdmin):
     def sfa_reach_percent(self, obj):
         return "%d%%" % (obj.sfa_reach * 100)
 
+    def sale_bonus_disp(self, obj):
+        return "%0.2f 元" % obj.sale_bonus
+
+    def exam_bonus_disp(self, obj):
+        return "%0.2f 元" % obj.exam_bonus
+
     def total_bonus(self, obj):
-        return "%0.2f" % (obj.sale_bonus + obj.exam_bonus)
+        return "%0.2f 元" % (obj.sale_bonus + obj.exam_bonus)
 
     date.short_description = '日期'
     staff_name.short_description = '姓名'
     last_month_reach_percent.short_description = '上月客户达成率'
     current_month_reach_percent.short_description = '本月客户达成率'
     sfa_reach_percent.short_description = 'SFA回单达成系数占比'
+    sale_bonus_disp.short_description = '销售奖金'
+    exam_bonus_disp.short_description = '考核奖金'
     total_bonus.short_description = '奖金合计'
 
 
 class StaffDataImportAdmin(admin.ModelAdmin):
+    fields = ('year', 'month', 'file')
+    list_display = ('date', 'imported', 'message', 'create_time')
+
+    def date(self, obj):
+        return "%d年%d月" % (obj.year, obj.month)
+
+    date.short_description = '数据日期'
+
+
+class HistoryDataImportAdmin(admin.ModelAdmin):
     fields = ('year', 'month', 'file')
     list_display = ('date', 'imported', 'message', 'create_time')
 
@@ -160,3 +178,4 @@ admin.site.register(ClientTarget, ClientTargetAdmin)
 admin.site.register(StaffTarget, StaffTargetAdmin)
 admin.site.register(BonusHistory, BonusHistoryAdmin)
 admin.site.register(StaffDataImport, StaffDataImportAdmin)
+admin.site.register(HistoryDataImport, HistoryDataImportAdmin)
