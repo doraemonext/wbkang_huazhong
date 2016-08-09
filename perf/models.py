@@ -268,8 +268,8 @@ def import_staff_data(sender, instance, created, **kwargs):
     if not created:
         return
 
-    filepath = os.path.join(settings.BASE_DIR, 'media', instance.file.name)
-    book = xlrd.open_workbook(filepath)
+    # filepath = os.path.join(settings.BASE_DIR, 'media', instance.file.name)
+    book = xlrd.open_workbook(instance.file.path)
     length = len(book.sheet_names())
     if length < 1:
         instance.imported = False
@@ -323,7 +323,7 @@ def import_staff_data(sender, instance, created, **kwargs):
             return
         area = area_model[0]
 
-        Staff.objects.create(
+        Staff.objects.get_or_create(
             identifier=identifier,
             name=name,
             password="123456",
