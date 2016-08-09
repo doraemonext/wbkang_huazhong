@@ -3,8 +3,13 @@
 from __future__ import unicode_literals
 
 import datetime
+import os
+import xlrd
+from django.conf import settings
 from django.db import models
+from django.db.models import signals
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from mptt.models import MPTTModel, TreeForeignKey
 
 
@@ -242,6 +247,8 @@ class StaffDataImport(models.Model):
     year = models.IntegerField("年")
     month = models.IntegerField("月")
     file = models.FileField("Excel 文件")
+    imported = models.BooleanField("是否成功导入", default=False)
+    message = models.TextField("说明信息", default='')
     create_time = models.DateTimeField("上传日期", auto_now_add=True)
 
     def __unicode__(self):
@@ -255,3 +262,86 @@ class StaffDataImport(models.Model):
 
     def save(self, *args, **kwargs):
         return super(StaffDataImport, self).save(*args, **kwargs)
+
+
+def import_staff_data(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    filepath = os.path.join(settings.BASE_DIR, 'media', instance.file.name)
+    book = xlrd.open_workbook(filepath)
+    length = len(book.sheet_names())
+    if length < 1:
+        instance.imported = False
+        instance.message = "至少需要一个 Sheet"
+        instance.save()
+        return
+
+    sheet = book.sheet_by_index(0)
+    nrows = sheet.nrows
+    ncols = sheet.ncols
+    if nrows <= 2:
+        instance.imported = False
+        instance.message = "数据文件不足 2 行"
+        instance.save()
+        return
+    if ncols != 11:
+        instance.imported = False
+        instance.message = "数据文件列数不为 10"
+        instance.save()
+        return
+
+    sid = transaction.savepoint()
+    for row in range(2, nrows):
+        identifier = str(int(sheet.cell_value(row, 1)))
+        name = sheet.cell_value(row, 2)
+        gender = sheet.cell_value(row, 3)
+        department = sheet.cell_value(row, 4)
+        job_name = sheet.cell_value(row, 5)
+        entry_date_tmp = xlrd.xldate_as_tuple(sheet.cell_value(row, 6), book.datemode)[:3]
+        entry_date = datetime.date(*entry_date_tmp).strftime("%Y-%m-%d")
+        cost_center = sheet.cell_value(row, 7)
+        department_desc = sheet.cell_value(row, 8)
+        cost_center_number = sheet.cell_value(row, 9)
+        area_name = sheet.cell_value(row, 10)
+
+        job_name_model = JobMatch.objects.filter(name=job_name)
+        if not job_name_model.exists():
+            transaction.savepoint_rollback(sid)
+            instance.imported = False
+            instance.message = "F%d 单元格数据错误, 未找到 %s 岗位名称的对应关系" % (row+1, job_name)
+            instance.save()
+            return
+        job = job_name_model[0].job
+
+        area_model = Area.objects.filter(name=area_name)
+        if not area_model.exists():
+            transaction.savepoint_rollback(sid)
+            instance.imported = False
+            instance.message = "K%d 单元格数据错误, 未找到名称为 %s 的地区" % (row+1, area_name)
+            instance.save()
+            return
+        area = area_model[0]
+
+        Staff.objects.create(
+            identifier=identifier,
+            name=name,
+            password="123456",
+            gender=Staff.GENDER_MALE if gender == "男" else Staff.GENDER_FEMALE,
+            area=area,
+            department=department,
+            job=job,
+            job_name=job_name,
+            entry_date=entry_date,
+            cost_center=cost_center,
+            department_desc=department_desc,
+            cost_center_number=cost_center_number,
+            status=Staff.STATUS_ACTIVE,
+        )
+
+    transaction.savepoint_commit(sid)
+    instance.imported = True
+    instance.message = "导入成功, 共导入 %d 个员工数据" % (nrows - 2)
+    instance.save()
+
+signals.post_save.connect(import_staff_data, sender=StaffDataImport)

@@ -142,7 +142,8 @@ class BonusHistoryAdmin(admin.ModelAdmin):
 
 
 class StaffDataImportAdmin(admin.ModelAdmin):
-    list_display = ('date', 'create_time')
+    fields = ('year', 'month', 'file')
+    list_display = ('date', 'imported', 'message', 'create_time')
 
     def date(self, obj):
         return "%d年%d月" % (obj.year, obj.month)
