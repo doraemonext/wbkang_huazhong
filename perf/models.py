@@ -10,6 +10,7 @@ from django.db import models
 from django.db.models import signals
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils.encoding import smart_unicode
 from mptt.models import MPTTModel, TreeForeignKey
 
 
@@ -113,7 +114,7 @@ class Staff(models.Model):
     openid = models.CharField('微信绑定ID', max_length=255, default='', blank=True, help_text='修改此处将导致原绑定无效')
 
     def __unicode__(self):
-        return self.name + ' (' + self.identifier + ')'
+        return smart_unicode(self.name + ' (' + self.identifier + ')')
 
     def clean(self):
         if len(self.openid) > 0:
@@ -252,7 +253,7 @@ class StaffDataImport(models.Model):
     create_time = models.DateTimeField("上传日期", auto_now_add=True)
 
     def __unicode__(self):
-        return u"%d-%d" % (self.year, self.month)
+        return smart_unicode("%d-%d" % (self.year, self.month))
 
     class Meta:
         db_table = 'perf_staff_data_import'
