@@ -11,6 +11,7 @@ from django.db.models import signals
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.encoding import smart_unicode
+from perf.utils import get_actual_value
 
 
 class Job(models.Model):
@@ -345,13 +346,6 @@ class HistoryDataImport(models.Model):
         verbose_name = '绩效奖金信息导入'
         verbose_name_plural = '绩效奖金信息导入'
         ordering = ['-year', '-month']
-
-
-def get_actual_value(sheet, merged_cells, row, col):
-    for cell in merged_cells:
-        if cell[0] <= row < cell[1] and cell[2] <= col < cell[3]:
-            return sheet.cell_value(cell[0], cell[2])
-    return sheet.cell_value(row, col)
 
 
 def import_history_data(sender, instance, created, **kwargs):
