@@ -571,7 +571,34 @@ def import_target_data(sender, instance, created, **kwargs):
             from_no = int(client_range[0])
             to_no = int(client_range[1])
 
-            continue
+            for cur in range(0, nrows):
+                if from_no <= sheet.cell_value(cur, 0) <= to_no:
+                    try:
+                        client_identifier = str(int(sheet.cell_value(cur, 3)))
+                    except ValueError:
+                        continue
+                    if not client_identifier:
+                        continue
+                    client_target = sheet.cell_value(cur, 5)
+                    client_model = Client.objects.get(identifier=client_identifier)
+                    client_target_model = ClientTarget.objects.get(client=client_model, year=instance.year, month=instance.month)
+
+                    staff_target_model = StaffTarget.objects.filter(client_target=client_target_model, staff=staff)
+                    if staff_target_model.exists():
+                        transaction.savepoint_rollback(sid)
+                        instance.imported = False
+                        instance.message = "员工 %s (%s) 的目标 %s (%s) (%d-%d) 已经存在, 导入失败" % (staff.name, staff.identifier, client_target_model.client.name, client_target_model.client.identifier, instance.year, instance.month)
+                        instance.save()
+                        return
+
+                    try:
+                        StaffTarget.objects.get_or_create(client_target=client_target_model, staff=staff, target=client_target)
+                    except Exception as e:
+                        transaction.savepoint_rollback(sid)
+                        instance.imported = False
+                        instance.message = e.message
+                        instance.save()
+                        return
 
     transaction.savepoint_commit(sid)
     instance.imported = True
