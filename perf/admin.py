@@ -2,14 +2,8 @@
 
 from __future__ import unicode_literals
 
-from mptt.admin import MPTTModelAdmin
 from django.contrib import admin
-from perf.models import Area, Job, JobMatch, Staff, Client, ClientTarget, StaffTarget, BonusHistory, StaffDataImport, HistoryDataImport
-
-
-class AreaAdmin(MPTTModelAdmin):
-    mptt_level_indent = 20
-    list_display = ('name', 'weight')
+from perf.models import Job, JobMatch, Staff, Client, ClientTarget, StaffTarget, BonusHistory, StaffDataImport, HistoryDataImport
 
 
 class JobAdmin(admin.ModelAdmin):
@@ -42,7 +36,7 @@ class JobMatchAdmin(admin.ModelAdmin):
 
 
 class StaffAdmin(admin.ModelAdmin):
-    list_display = ('identifier', 'name', 'gender', 'department', 'job', 'job_name', 'area', 'entry_date', 'cost_center', 'department_desc', 'cost_center_number', 'status_verbose', 'has_bound')
+    list_display = ('identifier', 'name', 'gender', 'department', 'job', 'job_name', 'area_weight', 'entry_date', 'cost_center', 'department_desc', 'cost_center_number', 'status_verbose', 'has_bound')
 
     def status_verbose(self, obj):
         status = obj.get_status()
@@ -169,7 +163,6 @@ class HistoryDataImportAdmin(admin.ModelAdmin):
     date.short_description = '数据日期'
 
 admin.site.empty_value_display = '无'
-admin.site.register(Area, AreaAdmin)
 admin.site.register(Job, JobAdmin)
 admin.site.register(JobMatch, JobMatchAdmin)
 admin.site.register(Staff, StaffAdmin)

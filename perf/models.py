@@ -14,29 +14,6 @@ from django.utils.encoding import smart_unicode
 from mptt.models import MPTTModel, TreeForeignKey
 
 
-class Area(MPTTModel):
-    """
-    地区 Model
-    """
-    parent = TreeForeignKey('self', verbose_name='父地区', null=True, blank=True, related_name='children', db_index=True)
-    name = models.CharField('名称', max_length=100)
-    weight = models.FloatField('地区权数', blank=True, null=True)
-
-    def __unicode__(self):
-        res = self.name
-        if self.weight:
-            res += ' (' + str(self.weight) + ')'
-        return res
-
-    class MPTTMeta:
-        order_insertion_by = ['name']
-
-    class Meta:
-        db_table = 'perf_area'
-        verbose_name = '地区管理'
-        verbose_name_plural = '地区管理'
-
-
 class Job(models.Model):
     """
     岗位 Model
@@ -105,7 +82,7 @@ class Staff(models.Model):
     department = models.CharField('部门', max_length=100)
     job = models.ForeignKey(Job, verbose_name='岗位')
     job_name = models.CharField('岗位名称', max_length=100, blank=True)
-    area = TreeForeignKey(Area, verbose_name='地区')
+    area_weight = models.FloatField('地区权重', default=0)
     entry_date = models.DateField('入职日期')
     cost_center = models.CharField('成本中心', max_length=100)
     department_desc = models.CharField('部门描述', max_length=200)
@@ -228,7 +205,7 @@ class BonusHistory(models.Model):
             self.job_name = self.staff.job.name
             self.bonus_base = self.staff.job.bonus_base
             self.job_weight = self.staff.job.job_weight
-            self.area_weight = self.staff.area.weight
+            self.area_weight = self.staff.area_weight
         super(BonusHistory, self).save(*args, **kwargs)
 
     def __unicode__(self):
@@ -300,7 +277,7 @@ def import_staff_data(sender, instance, created, **kwargs):
         cost_center = sheet.cell_value(row, 7)
         department_desc = sheet.cell_value(row, 8)
         cost_center_number = sheet.cell_value(row, 9)
-        area_name = sheet.cell_value(row, 10)
+        area_weight = sheet.cell_value(row, 10)
 
         job_name_model = JobMatch.objects.filter(name=job_name)
         if not job_name_model.exists():
@@ -310,15 +287,6 @@ def import_staff_data(sender, instance, created, **kwargs):
             instance.save()
             return
         job = job_name_model[0].job
-
-        area_model = Area.objects.filter(name=area_name)
-        if not area_model.exists():
-            transaction.savepoint_rollback(sid)
-            instance.imported = False
-            instance.message = "K%d 单元格数据错误, 未找到名称为 %s 的地区" % (row+1, area_name)
-            instance.save()
-            return
-        area = area_model[0]
 
         staff = Staff.objects.filter(identifier=identifier)
         if staff.exists():
@@ -334,7 +302,7 @@ def import_staff_data(sender, instance, created, **kwargs):
                 name=name,
                 password="123456",
                 gender=Staff.GENDER_MALE if gender == "男" else Staff.GENDER_FEMALE,
-                area=area,
+                area_weight=area_weight,
                 department=department,
                 job=job,
                 job_name=job_name,
@@ -371,7 +339,7 @@ class HistoryDataImport(models.Model):
     create_time = models.DateTimeField("上传日期", auto_now_add=True)
 
     def __unicode__(self):
-        return smart_unicode("%d-%d" % (self.year, self.month))
+        return "%d-%d" % (self.year, self.month)
 
     class Meta:
         db_table = 'perf_history_data_import'
@@ -403,7 +371,6 @@ def import_history_data(sender, instance, created, **kwargs):
     nrows = sheet.nrows
     ncols = sheet.ncols
     merged_cells = sheet.merged_cells
-    print(merged_cells)
     if nrows <= 3:
         instance.imported = False
         instance.message = "数据文件不足 3 行"
