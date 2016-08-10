@@ -320,7 +320,7 @@ class Calc1ToNAPI(APIView):
         else:
             self_ratio = convert_sale_to_bonus(current_sfa_reach) / total_bonus_ratio
 
-        sale_bonus = can_assign_amount * self_ratio * staff.job.job_weight * staff.area.weight
+        sale_bonus = can_assign_amount * self_ratio * staff.job.job_weight * staff.area_weight
         return Response({
             'code': 0,
             'message': '',
@@ -382,7 +382,7 @@ class Calc1To1API(APIView):
         else:
             can_assign_amount *= staff.job.sale_target
 
-        sale_bonus = can_assign_amount * staff.job.job_weight * staff.area.weight
+        sale_bonus = can_assign_amount * staff.job.job_weight * staff.area_weight
         return Response({
             'code': 0,
             'message': '',
@@ -445,7 +445,7 @@ class CalcNTo1API(APIView):
         else:
             can_assign_amount *= staff.job.sale_target
 
-        sale_bonus = can_assign_amount * staff.job.job_weight * staff.area.weight
+        sale_bonus = can_assign_amount * staff.job.job_weight * staff.area_weight
         return Response({
             'code': 0,
             'message': '',
