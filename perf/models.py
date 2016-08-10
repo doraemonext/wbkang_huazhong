@@ -11,7 +11,6 @@ from django.db.models import signals
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.encoding import smart_unicode
-from mptt.models import MPTTModel, TreeForeignKey
 
 
 class Job(models.Model):
