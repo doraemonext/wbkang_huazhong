@@ -320,6 +320,14 @@ def import_staff_data(sender, instance, created, **kwargs):
             return
         area = area_model[0]
 
+        staff = Staff.objects.filter(identifier=identifier)
+        if staff.exists():
+            transaction.savepoint_rollback(sid)
+            instance.imported = False
+            instance.message = "B%d 单元格数据错误, 已经存在员工号为 %s 的员工" % (row+1, identifier)
+            instance.save()
+            return
+
         try:
             Staff.objects.get_or_create(
                 identifier=identifier,
@@ -434,6 +442,14 @@ def import_history_data(sender, instance, created, **kwargs):
         sfa_reach = get_actual_value(sheet, merged_cells, row, 20)
         sale_bonus = get_actual_value(sheet, merged_cells, row, 21)
         exam_bonus = get_actual_value(sheet, merged_cells, row, 23)
+
+        bonus_history = BonusHistory.objects.filter(year=instance.year, month=instance.month, staff=staff)
+        if bonus_history.exists():
+            transaction.savepoint_rollback(sid)
+            instance.imported = False
+            instance.message = "员工 %s (%s) 的 %d 年 %d 月奖金数据已经存在" % (staff.name, staff.identifier, instance.year, instance.month)
+            instance.save()
+            return
 
         try:
             BonusHistory.objects.get_or_create(
