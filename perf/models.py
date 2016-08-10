@@ -435,3 +435,147 @@ def import_history_data(sender, instance, created, **kwargs):
     instance.save()
 
 signals.post_save.connect(import_history_data, sender=HistoryDataImport)
+
+
+class TargetDataImport(models.Model):
+    """
+    目标数据导入 Model
+    """
+    year = models.IntegerField("年")
+    month = models.IntegerField("月")
+    file = models.FileField(u"Excel 文件", upload_to=os.path.join(settings.BASE_DIR, "media"))
+    imported = models.BooleanField("是否成功导入", default=False)
+    message = models.TextField("说明信息", default='')
+    create_time = models.DateTimeField("上传日期", auto_now_add=True)
+
+    def __unicode__(self):
+        return "%d-%d" % (self.year, self.month)
+
+    class Meta:
+        db_table = 'perf_target_data_import'
+        verbose_name = '目标数据导入'
+        verbose_name_plural = '目标数据导入'
+        ordering = ['-year', '-month']
+
+
+def import_target_data(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    book = xlrd.open_workbook(instance.file.path)
+    length = len(book.sheet_names())
+    if length < 1:
+        instance.imported = False
+        instance.message = "至少需要一个 Sheet"
+        instance.save()
+        return
+
+    sheet = book.sheet_by_index(0)
+    nrows = sheet.nrows
+    ncols = sheet.ncols
+    merged_cells = sheet.merged_cells
+    if nrows <= 3:
+        instance.imported = False
+        instance.message = "数据文件不足 3 行"
+        instance.save()
+        return
+    if ncols != 10:
+        instance.imported = False
+        instance.message = "数据文件列数不为 10"
+        instance.save()
+        return
+
+    sid = transaction.savepoint()
+    staff_skip_list = []
+    client_skip_list = []
+    for row in range(3, nrows):
+        valid_staff = True
+        identifier = None
+        try:
+            identifier = str(int(sheet.cell_value(row, 6)))
+            if not identifier:
+                valid_staff = False
+        except ValueError:
+            valid_staff = False
+        if not valid_staff:
+            staff_skip_list.append("G%d" % (row+1))
+            continue
+
+        try:
+            staff = Staff.objects.get(identifier=identifier)
+        except Exception as e:
+            transaction.savepoint_rollback(sid)
+            instance.imported = False
+            instance.message = "员工号 %s 不存在, 无法导入, 错误信息: %s" % (identifier, e.message)
+            instance.save()
+            return
+        staff_target = get_actual_value(sheet, merged_cells, row, 9)
+
+        client_type = "normal"
+        client_name = sheet.cell_value(row, 4).strip()
+        client_range = client_name.split("-")
+        if len(client_range) == 2 and client_range[0].isdigit() and client_range[1].isdigit():
+            client_type = "range"
+
+        if client_type == "normal":
+            valid_client = True
+            client_identifier = None
+            try:
+                client_identifier = str(int(get_actual_value(sheet, merged_cells, row, 3)))
+                if not client_identifier:
+                    valid_client = False
+            except ValueError:
+                valid_client = False
+            if not valid_client:
+                client_skip_list.append("D%d" % (row+1))
+                continue
+
+            try:
+                client = Client.objects.get(identifier=client_identifier)
+            except Exception as e:
+                transaction.savepoint_rollback(sid)
+                instance.imported = False
+                instance.message = "客户代码 %s 不存在, 无法导入, 错误信息: %s" % (client_identifier, e.message)
+                instance.save()
+                return
+            client_target = get_actual_value(sheet, merged_cells, row, 5)
+
+            try:
+                client_target_model, created = ClientTarget.objects.get_or_create(client=client, year=instance.year, month=instance.month, target=client_target)
+            except Exception as e:
+                transaction.savepoint_rollback(sid)
+                instance.imported = False
+                instance.message = e.message
+                instance.save()
+                return
+
+            staff_target_model = StaffTarget.objects.filter(client_target=client_target_model, staff=staff)
+            if staff_target_model.exists():
+                transaction.savepoint_rollback(sid)
+                instance.imported = False
+                instance.message = "员工 %s (%s) 的目标 %s (%s) (%d-%d) 已经存在, 导入失败" % (staff.name, staff.identifier, client_target_model.client.name, client_target_model.client.identifier, instance.year, instance.month)
+                instance.save()
+                return
+
+            try:
+                StaffTarget.objects.get_or_create(client_target=client_target_model, staff=staff, target=staff_target)
+            except Exception as e:
+                transaction.savepoint_rollback(sid)
+                instance.imported = False
+                instance.message = e.message
+                instance.save()
+                return
+            continue
+
+        if client_type == "range":
+            from_no = int(client_range[0])
+            to_no = int(client_range[1])
+
+            continue
+
+    transaction.savepoint_commit(sid)
+    instance.imported = True
+    instance.message = "导入成功, 共导入 %d 个目标数据" % (nrows - 3)
+    instance.save()
+
+signals.post_save.connect(import_target_data, sender=TargetDataImport)
