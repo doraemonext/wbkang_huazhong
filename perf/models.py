@@ -125,6 +125,10 @@ class Client(models.Model):
     def __unicode__(self):
         return self.name + ' (' + self.identifier + ')'
 
+    def clean(self):
+        self.identifier = self.identifier.strip()
+        self.name = self.name.strip()
+
     class Meta:
         db_table = 'perf_client'
         verbose_name = '客户信息管理'
