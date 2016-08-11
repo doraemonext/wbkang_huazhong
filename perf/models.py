@@ -119,7 +119,7 @@ class Client(models.Model):
     """
     客户 Model
     """
-    identifier = models.CharField('客户代码', max_length=100)
+    identifier = models.CharField('客户代码', max_length=100, unique=True)
     name = models.CharField('客户名称', max_length=100)
 
     def __unicode__(self):
@@ -534,12 +534,15 @@ def import_target_data(sender, instance, created, **kwargs):
                 client_skip_list.append("D%d" % (row+1))
                 continue
 
+            if len(client_name) == 0:
+                continue
+
             try:
-                client = Client.objects.get(identifier=client_identifier)
+                client, created = Client.objects.get_or_create(identifier=client_identifier, name=client_name)
             except Exception as e:
                 transaction.savepoint_rollback(sid)
                 instance.imported = False
-                instance.message = "客户代码 %s 不存在, 无法导入, 错误信息: %s" % (client_identifier, e.message)
+                instance.message = "获取客户代码 %s 时出错, 无法导入, 错误信息: %s" % (client_identifier, e)
                 instance.save()
                 return
             client_target = get_actual_value(sheet, merged_cells, row, 5)
