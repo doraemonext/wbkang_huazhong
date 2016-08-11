@@ -148,7 +148,7 @@
                     for (var i = 0; i < client_target_list.length; i++) {
                         $('#basic_info').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 客户名称</p></div><div class="weui_cell_ft">' + client_target_list[i]['client_name'] + '</div></div>');
                         $('#basic_info').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 客户代码</p></div><div class="weui_cell_ft">' + client_target_list[i]['client_identifier'] + '</div></div>');
-                        $('#basic_info').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 客户目标金额</p></div><div class="weui_cell_ft">' + client_target_list[i]['client_target'] + '</div></div>');
+                        $('#basic_info').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 客户目标金额</p></div><div class="weui_cell_ft">' + client_target_list[i]['client_target'] + ' 元</div></div>');
                     }
                 },
                 error: function (xhr) {
