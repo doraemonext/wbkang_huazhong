@@ -116,13 +116,13 @@ class BonusHistoryAdmin(admin.ModelAdmin):
         return "%s (%s)" % (obj.name, obj.staff.identifier)
 
     def last_month_reach_percent(self, obj):
-        return "%d%%" % (obj.last_month_reach * 100)
+        return "%0.2f%%" % (obj.last_month_reach * 100)
 
     def current_month_reach_percent(self, obj):
-        return "%d%%" % (obj.current_month_reach * 100)
+        return "%0.2f%%" % (obj.current_month_reach * 100)
 
     def sfa_reach_percent(self, obj):
-        return "%d%%" % (obj.sfa_reach * 100)
+        return "%0.2f%%" % (obj.sfa_reach * 100)
 
     def sale_bonus_disp(self, obj):
         return "%0.2f 元" % obj.sale_bonus

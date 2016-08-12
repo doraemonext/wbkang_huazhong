@@ -493,6 +493,49 @@ def import_target_data(sender, instance, created, **kwargs):
     staff_skip_list = []
     client_skip_list = []
     for row in range(3, nrows):
+        client_type = "normal"
+        client_name = get_actual_value(sheet, merged_cells, row, 4).strip()
+        client_range = client_name.split("-")
+        if len(client_range) == 2 and client_range[0].isdigit() and client_range[1].isdigit():
+            client_type = "range"
+
+        if client_type == "normal":
+            valid_client = True
+            client_identifier = None
+            try:
+                client_identifier = str(int(get_actual_value(sheet, merged_cells, row, 3)))
+                if not client_identifier:
+                    valid_client = False
+            except ValueError:
+                valid_client = False
+            if not valid_client:
+                client_skip_list.append("D%d" % (row+1))
+                continue
+
+            if len(client_identifier) == 0 or len(client_name) == 0:
+                continue
+
+            try:
+                client, created = Client.objects.get_or_create(identifier=client_identifier, name=client_name)
+            except Exception as e:
+                transaction.savepoint_rollback(sid)
+                instance.imported = False
+                instance.message = "获取客户代码 %s 时出错, 无法导入, 错误信息: %s" % (client_identifier, e)
+                instance.save()
+                return
+            client_target = get_actual_value(sheet, merged_cells, row, 5)
+
+            try:
+                client_target_model, created = ClientTarget.objects.get_or_create(client=client, year=instance.year, month=instance.month, target=client_target)
+            except Exception as e:
+                transaction.savepoint_rollback(sid)
+                instance.imported = False
+                instance.message = e.message
+                instance.save()
+                return
+
+        ###################################################################
+
         valid_staff = True
         identifier = None
         try:
@@ -515,47 +558,7 @@ def import_target_data(sender, instance, created, **kwargs):
             return
         staff_target = get_actual_value(sheet, merged_cells, row, 9)
 
-        client_type = "normal"
-        client_name = sheet.cell_value(row, 4).strip()
-        client_range = client_name.split("-")
-        if len(client_range) == 2 and client_range[0].isdigit() and client_range[1].isdigit():
-            client_type = "range"
-
         if client_type == "normal":
-            valid_client = True
-            client_identifier = None
-            try:
-                client_identifier = str(int(get_actual_value(sheet, merged_cells, row, 3)))
-                if not client_identifier:
-                    valid_client = False
-            except ValueError:
-                valid_client = False
-            if not valid_client:
-                client_skip_list.append("D%d" % (row+1))
-                continue
-
-            if len(client_name) == 0:
-                continue
-
-            try:
-                client, created = Client.objects.get_or_create(identifier=client_identifier, name=client_name)
-            except Exception as e:
-                transaction.savepoint_rollback(sid)
-                instance.imported = False
-                instance.message = "获取客户代码 %s 时出错, 无法导入, 错误信息: %s" % (client_identifier, e)
-                instance.save()
-                return
-            client_target = get_actual_value(sheet, merged_cells, row, 5)
-
-            try:
-                client_target_model, created = ClientTarget.objects.get_or_create(client=client, year=instance.year, month=instance.month, target=client_target)
-            except Exception as e:
-                transaction.savepoint_rollback(sid)
-                instance.imported = False
-                instance.message = e.message
-                instance.save()
-                return
-
             staff_target_model = StaffTarget.objects.filter(client_target=client_target_model, staff=staff)
             if staff_target_model.exists():
                 transaction.savepoint_rollback(sid)
