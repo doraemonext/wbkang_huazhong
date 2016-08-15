@@ -86,7 +86,7 @@ class ClientTargetAdmin(admin.ModelAdmin):
         return "%d年%d月" % (obj.year, obj.month)
 
     def target_display(self, obj):
-        return "%0.2f" % obj.target
+        return "%0.2f 元" % obj.target
 
     date.short_description = '日期'
     target_display.short_description = '客户目标金额(元)'
@@ -99,10 +99,10 @@ class StaffTargetAdmin(admin.ModelAdmin):
         return "%s" % obj.client_target.client.name + ' (' + obj.client_target.client.identifier + ')'
 
     def client_target_amount(self, obj):
-        return "%0.2f" % obj.client_target.target
+        return "%0.2f 元" % obj.client_target.target
 
     def target_display(self, obj):
-        return "%0.2f" % obj.target
+        return "%0.2f 元" % obj.target
 
     def date(self, obj):
         return "%d年%d月" % (obj.client_target.year, obj.client_target.month)
