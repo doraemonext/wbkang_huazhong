@@ -76,6 +76,12 @@ class Info1ToNAPI(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         staff = staff_list[0]
 
+        if not staff.job.is_grass_roots:
+            return Response({
+                'code': 5,
+                'message': '您是非基层人员, 请返回重新选择',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         today = datetime.date.today()
         year = today.year
         month = today.month
@@ -93,7 +99,7 @@ class Info1ToNAPI(APIView):
         staff_target = staff_target_list[0]
         client_target = staff_target.client_target
 
-        slist = StaffTarget.objects.filter(client_target=client_target)
+        slist = StaffTarget.objects.filter(client_target=client_target, staff__job__is_grass_roots=True)
         if len(slist) <= 1:
             return Response({
                 'code': 4,
@@ -147,6 +153,12 @@ class Info1To1API(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         staff = staff_list[0]
 
+        if not staff.job.is_grass_roots:
+            return Response({
+                'code': 5,
+                'message': '您是非基层人员, 请返回重新选择',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         today = datetime.date.today()
         year = today.year
         month = today.month
@@ -164,7 +176,7 @@ class Info1To1API(APIView):
         staff_target = staff_target_list[0]
         client_target = staff_target.client_target
 
-        slist = StaffTarget.objects.filter(client_target=client_target)
+        slist = StaffTarget.objects.filter(client_target=client_target, staff__job__is_grass_roots=True)
         if len(slist) > 1:
             return Response({
                 'code': 4,
@@ -266,6 +278,12 @@ class Calc1ToNAPI(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         staff = staff_list[0]
 
+        if not staff.job.is_grass_roots:
+            return Response({
+                'code': 5,
+                'message': '您是非基层人员, 请返回重新选择',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         today = datetime.date.today()
         year = today.year
         month = today.month
@@ -283,7 +301,7 @@ class Calc1ToNAPI(APIView):
         staff_target = staff_target_list[0]
         client_target = staff_target.client_target
 
-        slist = StaffTarget.objects.filter(client_target=client_target)
+        slist = StaffTarget.objects.filter(client_target=client_target, staff__job__is_grass_roots=True)
         if len(slist) <= 1:
             return Response({
                 'code': 4,
@@ -350,6 +368,12 @@ class Calc1To1API(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         staff = staff_list[0]
 
+        if not staff.job.is_grass_roots:
+            return Response({
+                'code': 5,
+                'message': '您是非基层人员, 请返回重新选择',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         today = datetime.date.today()
         year = today.year
         month = today.month
@@ -367,7 +391,7 @@ class Calc1To1API(APIView):
         staff_target = staff_target_list[0]
         client_target = staff_target.client_target
 
-        slist = StaffTarget.objects.filter(client_target=client_target)
+        slist = StaffTarget.objects.filter(client_target=client_target, staff__job__is_grass_roots=True)
         if len(slist) > 1:
             return Response({
                 'code': 4,
