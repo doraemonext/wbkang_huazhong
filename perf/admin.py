@@ -162,6 +162,7 @@ class HistoryDataImportAdmin(admin.ModelAdmin):
 
     date.short_description = '数据日期'
 
+
 class TargetDataImportAdmin(admin.ModelAdmin):
     fields = ('year', 'month', 'file')
     list_display = ('date', 'imported', 'message', 'create_time')
