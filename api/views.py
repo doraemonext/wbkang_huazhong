@@ -114,7 +114,7 @@ class Info1ToNAPI(APIView):
                 continue
             assign_result.append({
                 'identifier': s.staff.identifier,
-                'job_name': s.staff.job.name,
+                'job_name': s.staff.job_name,
                 'name': s.staff.name,
                 'target': s.target,
             })
@@ -189,7 +189,7 @@ class Info1To1API(APIView):
             'data': {
                 'date': "%04d 年 %02d 月" % (year, month),
                 'name': staff.name,
-                'job_name': staff.job.name,
+                'job_name': staff.job_name,
                 'target': staff_target.target,
                 'client_name': client_target.client.name,
                 'client_identifier': client_target.client.identifier,
@@ -248,7 +248,7 @@ class InfoNTo1API(APIView):
             'data': {
                 'date': "%04d 年 %02d 月" % (year, month),
                 'name': staff.name,
-                'job_name': staff.job.name,
+                'job_name': staff.job_name,
                 'target': total_target,
                 'client_target': total_target,
                 'client_target_list': client_target_list,

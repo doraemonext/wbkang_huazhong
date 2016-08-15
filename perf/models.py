@@ -207,7 +207,7 @@ class BonusHistory(models.Model):
     def save(self, *args, **kwargs):
         if self.staff is not None:
             self.name = self.staff.name
-            self.job_name = self.staff.job.name
+            self.job_name = self.staff.job_name
             self.bonus_base = self.staff.job.bonus_base
             self.job_weight = self.staff.job.job_weight
             self.area_weight = self.staff.area_weight
