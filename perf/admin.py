@@ -7,7 +7,7 @@ from perf.models import Job, JobMatch, Staff, Client, ClientTarget, StaffTarget,
 
 
 class JobAdmin(admin.ModelAdmin):
-    list_display = ('name', 'bonus_base', 'job_weight', 'sale_target_percent', 'exam_target_percent', 'profit_target_percent', 'has_trial', 'trial_sale_target_percent', 'trial_exam_target_percent')
+    list_display = ('name', 'bonus_base', 'job_weight', 'sale_target_percent', 'exam_target_percent', 'profit_target_percent', 'is_grass_roots', 'has_trial', 'trial_sale_target_percent', 'trial_exam_target_percent')
 
     def sale_target_percent(self, obj):
         return "%d%%" % (obj.sale_target * 100)
