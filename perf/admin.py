@@ -79,13 +79,17 @@ class StaffTargetInline(admin.StackedInline):
 
 
 class ClientTargetAdmin(admin.ModelAdmin):
-    list_display = ('client', 'date', 'target')
+    list_display = ('client', 'date', 'target_display')
     inlines = [StaffTargetInline, ]
 
     def date(self, obj):
         return "%d年%d月" % (obj.year, obj.month)
 
+    def target_display(self, obj):
+        return "%0.2f" % obj.target
+
     date.short_description = '日期'
+    target_display.short_description = '客户目标金额(元)'
 
 
 class StaffTargetAdmin(admin.ModelAdmin):
