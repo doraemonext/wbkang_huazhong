@@ -89,13 +89,16 @@ class ClientTargetAdmin(admin.ModelAdmin):
 
 
 class StaffTargetAdmin(admin.ModelAdmin):
-    list_display = ('staff', 'client_name', 'date', 'client_target_amount',  'target')
+    list_display = ('staff', 'client_name', 'date', 'client_target_amount',  'target_display')
 
     def client_name(self, obj):
         return "%s" % obj.client_target.client.name + ' (' + obj.client_target.client.identifier + ')'
 
     def client_target_amount(self, obj):
-        return "%d" % obj.client_target.target
+        return "%0.2f" % obj.client_target.target
+
+    def target_display(self, obj):
+        return "%0.2f" % obj.target
 
     def date(self, obj):
         return "%d年%d月" % (obj.client_target.year, obj.client_target.month)
@@ -103,6 +106,7 @@ class StaffTargetAdmin(admin.ModelAdmin):
     client_name.short_description = '客户'
     client_target_amount.short_description = '客户目标(元)'
     date.short_description = '日期'
+    target_display.short_description = '个人目标(元)'
 
 
 class BonusHistoryAdmin(admin.ModelAdmin):
