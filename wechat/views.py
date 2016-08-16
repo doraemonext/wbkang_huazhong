@@ -29,7 +29,7 @@ class ProcessorView(View):
         return super(ProcessorView, self).dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        signature = request.GET.get('signature')
+        signature = request.GET.get('msg_signature')
         timestamp = request.GET.get('timestamp')
         nonce = request.GET.get('nonce')
         echostr = request.GET.get('echostr')
@@ -42,7 +42,7 @@ class ProcessorView(View):
         return HttpResponse(resp)
 
     def post(self, request, *args, **kwargs):
-        signature = request.GET.get('signature')
+        signature = request.GET.get('msg_signature')
         timestamp = request.GET.get('timestamp')
         nonce = request.GET.get('nonce')
 
