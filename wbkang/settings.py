@@ -144,6 +144,7 @@ SUIT_CONFIG = {
             'perf.staffdataimport',
             'perf.historydataimport',
             'perf.targetdataimport',
+            'perf.jobdataimport',
         )},
         {'label': '系统用户管理', 'icon': 'icon-lock', 'models': ('auth.user',)},
     )

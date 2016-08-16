@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from perf.models import Job, JobMatch, Staff, Client, ClientTarget, StaffTarget, BonusHistory, StaffDataImport, HistoryDataImport, TargetDataImport
+from perf.models import Job, JobMatch, Staff, Client, ClientTarget, StaffTarget, BonusHistory, StaffDataImport, HistoryDataImport, TargetDataImport, JobDataImport
 
 
 class JobAdmin(admin.ModelAdmin):
@@ -180,6 +180,11 @@ class TargetDataImportAdmin(admin.ModelAdmin):
 
     date.short_description = '数据日期'
 
+
+class JobDataImportAdmin(admin.ModelAdmin):
+    fields = ('file', )
+    list_display = ('imported', 'message', 'create_time')
+
 admin.site.empty_value_display = '无'
 admin.site.register(Job, JobAdmin)
 admin.site.register(JobMatch, JobMatchAdmin)
@@ -191,3 +196,4 @@ admin.site.register(BonusHistory, BonusHistoryAdmin)
 admin.site.register(StaffDataImport, StaffDataImportAdmin)
 admin.site.register(HistoryDataImport, HistoryDataImportAdmin)
 admin.site.register(TargetDataImport, TargetDataImportAdmin)
+admin.site.register(JobDataImport, JobDataImportAdmin)

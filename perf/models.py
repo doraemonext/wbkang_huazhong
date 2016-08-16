@@ -617,3 +617,80 @@ def import_target_data(sender, instance, created, **kwargs):
     instance.save()
 
 signals.post_save.connect(import_target_data, sender=TargetDataImport)
+
+
+class JobDataImport(models.Model):
+    """
+    岗位名称对应关系导入 Model
+    """
+    file = models.FileField(u"Excel 文件", upload_to=os.path.join(settings.BASE_DIR, "media"))
+    imported = models.BooleanField("是否成功导入", default=False)
+    message = models.TextField("说明信息", default='')
+    create_time = models.DateTimeField("上传日期", auto_now_add=True)
+
+    def __unicode__(self):
+        return "%s" % self.file.name
+
+    class Meta:
+        db_table = 'perf_job_data_import'
+        verbose_name = '岗位数据导入'
+        verbose_name_plural = '岗位数据导入'
+
+
+def import_job_data(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    book = xlrd.open_workbook(instance.file.path)
+    length = len(book.sheet_names())
+    if length < 1:
+        instance.imported = False
+        instance.message = "至少需要一个 Sheet"
+        instance.save()
+        return
+
+    sheet = book.sheet_by_index(0)
+    nrows = sheet.nrows
+    ncols = sheet.ncols
+    if nrows <= 2:
+        instance.imported = False
+        instance.message = "数据文件不足 2 行"
+        instance.save()
+        return
+    if ncols != 3:
+        instance.imported = False
+        instance.message = "数据文件列数不为 3"
+        instance.save()
+        return
+
+    sid = transaction.savepoint()
+    for row in range(2, nrows):
+        name = sheet.cell_value(row, 1)
+        category = sheet.cell_value(row, 2)
+        job_list = Job.objects.filter(name=category)
+        if not job_list.exists():
+            transaction.savepoint_rollback(sid)
+            instance.imported = False
+            instance.message = "岗位分类 %s 不存在" % category
+            instance.save()
+            return
+        job = job_list[0]
+
+        l = JobMatch.objects.filter(name=name, job=job)
+        if l.exists():
+            continue
+        try:
+            JobMatch.objects.create(name=name, job=job)
+        except Exception as e:
+            transaction.savepoint_rollback(sid)
+            instance.imported = False
+            instance.message = "新建岗位 %s 数据时发生错误: %s" % (name, e.message)
+            instance.save()
+            return
+
+    transaction.savepoint_commit(sid)
+    instance.imported = True
+    instance.message = "导入成功, 共导入 %d 个目标数据" % (nrows - 2)
+    instance.save()
+
+signals.post_save.connect(import_job_data, sender=JobDataImport)
