@@ -663,13 +663,13 @@ def import_job_data(sender, instance, created, **kwargs):
         instance.save()
         return
 
-    sid = transaction.savepoint()
+    # sid = transaction.savepoint()
     for row in range(2, nrows):
         name = sheet.cell_value(row, 1)
         category = sheet.cell_value(row, 2)
         job_list = Job.objects.filter(name=category)
         if not job_list.exists():
-            transaction.savepoint_rollback(sid)
+            # transaction.savepoint_rollback(sid)
             instance.imported = False
             instance.message = "岗位分类 %s 不存在" % category
             instance.save()
@@ -682,13 +682,12 @@ def import_job_data(sender, instance, created, **kwargs):
         try:
             JobMatch.objects.create(name=name, job=job)
         except Exception as e:
-            transaction.savepoint_rollback(sid)
             instance.imported = False
             instance.message = "新建岗位 %s 数据时发生错误: %s" % (name, e.message)
             instance.save()
             return
 
-    transaction.savepoint_commit(sid)
+    # transaction.savepoint_commit(sid)
     instance.imported = True
     instance.message = "导入成功, 共导入 %d 个目标数据" % (nrows - 2)
     instance.save()
