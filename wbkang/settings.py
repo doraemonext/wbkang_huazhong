@@ -157,7 +157,7 @@ REST_FRAMEWORK = {
 }
 
 # Wechat
-BASE_URL = 'http://testwechat.doraemonext.com'
-WECHAT_APPID = 'wxa81b377716e65e59'
-WECHAT_APPSECRET = 'dec5b806b243713f15b2c92c22bca512'
+BASE_URL = 'http://123.207.172.193'
+WECHAT_CORP_ID = 'wx4ca093fd238f92d4'
 WECHAT_TOKEN = 'test_token'
+WECHAT_ENCODING_AES_KEY = 'J4NgQ0v5r0ohTOK4oNVw4qETuPCcmtoxyppEUHghjMT'

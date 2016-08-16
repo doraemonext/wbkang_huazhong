@@ -9,8 +9,14 @@ from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.http.response import HttpResponse
-from wechat_sdk import WechatBasic, WechatConf
-from wechat_sdk.messages import TextMessage, EventMessage
+from wechatpy.enterprise.crypto import WeChatCrypto
+from wechatpy.exceptions import InvalidSignatureException
+from wechatpy.enterprise.crypto import WeChatCrypto
+from wechatpy.exceptions import InvalidSignatureException
+from wechatpy.enterprise.exceptions import InvalidCorpIdException
+from wechatpy.enterprise import parse_message, create_reply
+from wechatpy.messages import TextMessage
+from wechatpy.events import ClickEvent
 from perf.models import Staff
 
 
@@ -28,34 +34,36 @@ class ProcessorView(View):
         nonce = request.GET.get('nonce')
         echostr = request.GET.get('echostr')
 
-        conf = WechatConf(appid=settings.WECHAT_APPID, appsecret=settings.WECHAT_APPSECRET, token=settings.WECHAT_TOKEN, encrypt_mode='normal')
-        basic = WechatBasic(conf=conf)
-        if basic.check_signature(signature=signature, timestamp=timestamp, nonce=nonce):
-            return HttpResponse(echostr)
-        else:
+        crypto = WeChatCrypto(settings.WECHAT_TOKEN, settings.WECHAT_ENCODING_AES_KEY, settings.WECHAT_CORP_ID)
+        try:
+            resp = crypto.check_signature(signature, timestamp, nonce, echostr)
+        except InvalidSignatureException:
             return HttpResponse("ERROR CHECK SIGNATURE")
+        return HttpResponse(resp)
 
     def post(self, request, *args, **kwargs):
         signature = request.GET.get('signature')
         timestamp = request.GET.get('timestamp')
         nonce = request.GET.get('nonce')
 
-        conf = WechatConf(appid=settings.WECHAT_APPID, appsecret=settings.WECHAT_APPSECRET, token=settings.WECHAT_TOKEN, encrypt_mode='normal')
-        basic = WechatBasic(conf=conf)
-        if not basic.check_signature(signature=signature, timestamp=timestamp, nonce=nonce):
+        crypto = WeChatCrypto(settings.WECHAT_TOKEN, settings.WECHAT_ENCODING_AES_KEY, settings.WECHAT_CORP_ID)
+        try:
+            decrypted_xml = crypto.decrypt_message(request.body, signature, timestamp, nonce)
+        except (InvalidSignatureException, InvalidCorpIdException):
             return HttpResponse("ERROR CHECK SIGNATURE")
-
-        basic.parse_data(request.body)
-        message = basic.get_message()
-        if isinstance(message, TextMessage):
-            if message.content == "绩效":
-                return HttpResponse(basic.response_text("<a href='%s'>点击此处计算绩效</a>" % (
-                settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source)))
-        elif isinstance(message, EventMessage):
-            if message.key == "绩效":
-                return HttpResponse(basic.response_text("<a href='%s'>点击此处计算绩效</a>" % (
-                settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source)))
-        return HttpResponse(basic.response_none())
+        else:
+            message = parse_message(decrypted_xml)
+            if isinstance(message, TextMessage):
+                if message.content == "绩效":
+                    xml = create_reply("<a href='%s'>点击此处计算绩效</a>" % (settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source), message).render()
+                    encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
+                    return HttpResponse(encrypted_xml)
+            elif isinstance(message, ClickEvent):
+                if message.key == "绩效":
+                    xml = create_reply("<a href='%s'>点击此处计算绩效</a>" % (settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source), message).render()
+                    encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
+                    return HttpResponse(encrypted_xml)
+            return HttpResponse("success")
 
 
 class LoginView(View):
