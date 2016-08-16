@@ -676,11 +676,8 @@ def import_job_data(sender, instance, created, **kwargs):
             return
         job = job_list[0]
 
-        l = JobMatch.objects.filter(name=name, job=job)
-        if l.exists():
-            continue
         try:
-            JobMatch.objects.create(name=name, job=job)
+            job_match, created = JobMatch.objects.get_or_create(name=name, job=job)
         except Exception as e:
             instance.imported = False
             instance.message = "新建岗位 %s 数据时发生错误: %s" % (name, e.message)
