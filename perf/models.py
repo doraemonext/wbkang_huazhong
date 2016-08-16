@@ -677,10 +677,10 @@ def import_job_data(sender, instance, created, **kwargs):
         job = job_list[0]
 
         try:
-            job_match, created = JobMatch.objects.get_or_create(name=name, job=job)
+            JobMatch.objects.get_or_create(name=name, job=job)
         except Exception as e:
             instance.imported = False
-            instance.message = "新建岗位 %s 数据时发生错误: %s" % (name, e.message)
+            instance.message = "%s -> %s 与原有岗位类别冲突, 请检查" % (name, category)
             instance.save()
             return
 
