@@ -8,7 +8,7 @@ import xlrd
 from django.conf import settings
 from django.db import models
 from django.db.models import signals
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, MultipleObjectsReturned
 from django.db import transaction
 from django.utils.encoding import smart_unicode
 from perf.utils import get_actual_value
@@ -144,6 +144,7 @@ class ClientTarget(models.Model):
     client = models.ForeignKey(Client, verbose_name='客户')
     year = models.IntegerField("年")
     month = models.IntegerField("月")
+    group = models.CharField("组别", max_length=100, blank=True, null=True)
     target = models.FloatField("客户目标金额(元)")
 
     def clean(self):
@@ -525,9 +526,10 @@ def import_target_data(sender, instance, created, **kwargs):
                 instance.save()
                 return
             client_target = get_actual_value(sheet, merged_cells, row, 5)
+            client_group = get_actual_value(sheet, merged_cells, row, 2)
 
             try:
-                client_target_model, created = ClientTarget.objects.get_or_create(client=client, year=instance.year, month=instance.month, target=client_target)
+                client_target_model, created = ClientTarget.objects.get_or_create(client=client, year=instance.year, month=instance.month, group=client_group, target=client_target)
             except Exception as e:
                 transaction.savepoint_rollback(sid)
                 instance.imported = False
@@ -591,8 +593,19 @@ def import_target_data(sender, instance, created, **kwargs):
                     if not client_identifier:
                         continue
                     client_target = sheet.cell_value(cur, 5)
+                    client_group = get_actual_value(sheet, merged_cells, row, 2).strip(' 小计')
                     client_model = Client.objects.get(identifier=client_identifier)
-                    client_target_model = ClientTarget.objects.get(client=client_model, year=instance.year, month=instance.month)
+                    try:
+                        client_target_model = ClientTarget.objects.get(client=client_model, year=instance.year, month=instance.month)
+                    except MultipleObjectsReturned as e:
+                        try:
+                            client_target_model = ClientTarget.objects.get(client=client_model, year=instance.year, month=instance.month, group=client_group)
+                        except Exception as e:
+                            transaction.savepoint_rollback(sid)
+                            instance.imported = False
+                            instance.message = "存在无法辨识的客户目标, 客户代码为 %s (%s), 组别为 %s" % (client_model.identifier, client_model.name, client_group)
+                            instance.save()
+                            return
 
                     staff_target_model = StaffTarget.objects.filter(client_target=client_target_model, staff=staff)
                     if staff_target_model.exists():
