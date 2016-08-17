@@ -593,7 +593,7 @@ def import_target_data(sender, instance, created, **kwargs):
                     if not client_identifier:
                         continue
                     client_target = sheet.cell_value(cur, 5)
-                    client_group = get_actual_value(sheet, merged_cells, row, 2).strip(' 小计')
+                    client_group = get_actual_value(sheet, merged_cells, row, 2).strip(' 小计合')
                     client_model = Client.objects.get(identifier=client_identifier)
                     try:
                         client_target_model = ClientTarget.objects.get(client=client_model, year=instance.year, month=instance.month)
