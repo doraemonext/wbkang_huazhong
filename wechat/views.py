@@ -55,7 +55,7 @@ class ProcessorView(View):
             message = parse_message(decrypted_xml)
             if isinstance(message, TextMessage):
                 if message.content == "绩效":
-                    xml = create_reply("<a href='%s'>点击此处计算绩效</a>" % (settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source), message).render()
+                    xml = create_reply("<a href='%s'>点击此处计算绩效</a>%s" % (settings.BASE_URL + reverse("wechat:login") + "?openid=" + message.source, message.__dict__), message).render()
                     encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
                     return HttpResponse(encrypted_xml)
             elif isinstance(message, ClickEvent):
