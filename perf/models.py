@@ -113,7 +113,7 @@ class Staff(models.Model):
         db_table = 'perf_staff'
         verbose_name = '员工管理'
         verbose_name_plural = '员工管理'
-        ordering = ['-id']
+        ordering = ['-identifier']
 
 
 class Client(models.Model):
@@ -134,7 +134,7 @@ class Client(models.Model):
         db_table = 'perf_client'
         verbose_name = '客户信息管理'
         verbose_name_plural = '客户信息管理'
-        ordering = ['-id']
+        ordering = ['-identifier']
 
 
 class ClientTarget(models.Model):
