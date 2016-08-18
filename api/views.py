@@ -314,16 +314,25 @@ class Calc1ToNAPI(APIView):
                 continue
             if s.staff.job.name != staff.job.name:
                 continue
+            skip_flag = False
+            if float(others[len(assign_result)]) < 0.8:
+                skip_flag = True
             assign_result.append({
                 'identifier': s.staff.identifier,
                 'job_name': s.staff.job.name,
                 'name': s.staff.name,
                 'target': s.target,
+                'skip': skip_flag,
             })
 
         # Begin to calculate
         # 销售奖金分配总额
-        can_assign_amount = (len(assign_result) + 1) * convert_sale_to_bonus(current_client_reach) * staff.job.bonus_base
+        len_assign_result = 0
+        for index, assign in enumerate(assign_result):
+            if not assign['skip']:
+                len_assign_result += 1
+
+        can_assign_amount = (len_assign_result + 1) * convert_sale_to_bonus(current_client_reach) * staff.job.bonus_base
         if staff.get_status() == Staff.STATUS_TRIAL:
             can_assign_amount *= staff.job.trial_sale_target
         else:
@@ -332,6 +341,8 @@ class Calc1ToNAPI(APIView):
         # 奖金系数占比
         total_bonus_ratio = convert_sale_to_bonus(current_sfa_reach)
         for index, assign in enumerate(assign_result):
+            if assign['skip']:
+                continue
             total_bonus_ratio += convert_sale_to_bonus(float(others[index]))
         if total_bonus_ratio == 0:
             self_ratio = 0
