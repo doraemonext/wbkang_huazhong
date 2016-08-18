@@ -142,13 +142,13 @@
                     $('#date').html(data['date']);
                     $('#name').html(data['name']);
                     $('#job_name').html(data['job_name']);
-                    $('#target').html(data['target'] + " 元");
-                    $('#client_target').html(data['client_target'] + " 元");
+                    $('#target').html(data['target'].toFixed(2) + " 元");
+                    $('#client_target').html(data['client_target'].toFixed(2) + " 元");
                     var client_target_list = data['client_target_list'];
                     for (var i = 0; i < client_target_list.length; i++) {
                         $('#basic_info').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 客户名称</p></div><div class="weui_cell_ft">' + client_target_list[i]['client_name'] + '</div></div>');
                         $('#basic_info').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 客户代码</p></div><div class="weui_cell_ft">' + client_target_list[i]['client_identifier'] + '</div></div>');
-                        $('#basic_info').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 客户目标金额</p></div><div class="weui_cell_ft">' + client_target_list[i]['client_target'] + ' 元</div></div>');
+                        $('#basic_info').append('<div class="weui_cell"><div class="weui_cell_bd weui_cell_primary"><p>' + (i+1) + ' - 客户目标金额</p></div><div class="weui_cell_ft">' + client_target_list[i]['client_target'].toFixed(2) + ' 元</div></div>');
                     }
                 },
                 error: function (xhr) {

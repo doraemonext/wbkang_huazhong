@@ -156,10 +156,10 @@
                    $('#date').html(data['date']);
                    $('#name').html(data['name']);
                    $('#job_name').html(data['job_name']);
-                   $('#target').html(data['target'] + " 元");
+                   $('#target').html(data['target'].toFixed(2) + " 元");
                    $('#client_name').html(data['client_name']);
                    $('#client_identifier').html(data['client_identifier']);
-                   $('#client_target').html(data['client_target'] + " 元");
+                   $('#client_target').html(data['client_target'].toFixed(2) + " 元");
                },
                error: function (xhr) {
                    var data = $.parseJSON(xhr.responseText);
