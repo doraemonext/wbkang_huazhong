@@ -542,7 +542,7 @@ def import_target_data(sender, instance, created, **kwargs):
         valid_staff = True
         identifier = None
         try:
-            identifier = str(int(sheet.cell_value(row, 6)))
+            identifier = str(int(get_actual_value(sheet, merged_cells, row, 6)))
             if not identifier:
                 valid_staff = False
         except ValueError:
@@ -571,7 +571,12 @@ def import_target_data(sender, instance, created, **kwargs):
                 return
 
             try:
-                StaffTarget.objects.get_or_create(client_target=client_target_model, staff=staff, target=staff_target)
+                if staff_target <= client_target:
+                    StaffTarget.objects.get_or_create(client_target=client_target_model, staff=staff,
+                                                      target=staff_target)
+                else:
+                    StaffTarget.objects.get_or_create(client_target=client_target_model, staff=staff,
+                                                      target=client_target)
             except Exception as e:
                 transaction.savepoint_rollback(sid)
                 instance.imported = False
