@@ -156,10 +156,10 @@
                    $('#date').html(data['date']);
                    $('#name').html(data['name']);
                    $('#job_name').html(data['job_name']);
-                   $('#target').html(data['target'].toFixed(2) + " 元");
+                   $('#target').html((parseFloat(parseInt(data['target'] * 100)) / 100).toFixed(2) + " 元");
                    $('#client_name').html(data['client_name']);
                    $('#client_identifier').html(data['client_identifier']);
-                   $('#client_target').html(data['client_target'].toFixed(2) + " 元");
+                   $('#client_target').html((parseFloat(parseInt(data['client_target'] * 100)) / 100).toFixed(2) + " 元");
                },
                error: function (xhr) {
                    var data = $.parseJSON(xhr.responseText);
@@ -177,7 +177,7 @@
                 if (isNaN(res)) {
                     $('#current_month_reach').html("... %");
                 } else {
-                    $('#current_month_reach').html((res * 100).toFixed(2) + " %");
+                    $('#current_month_reach').html((parseFloat(parseInt(res * 10000)) / 100).toFixed(2) + " %");
                 }
             });
             $('#current_month_money').on('change', function () {
@@ -185,7 +185,7 @@
                 if (isNaN(res)) {
                     $('#current_month_reach').html("... %");
                 } else {
-                    $('#current_month_reach').html((res * 100).toFixed(2) + " %");
+                    $('#current_month_reach').html((parseFloat(parseInt(res * 10000)) / 100).toFixed(2) + " %");
                 }
             });
 
@@ -202,7 +202,7 @@
                     },
                     success: function (data) {
                         data = data['data'];
-                        $('#sale_bonus').html(data['sale_bonus'].toFixed(2) + " 元");
+                        $('#sale_bonus').html((parseFloat(parseInt(data['sale_bonus'] * 100)) / 100).toFixed(2) + " 元");
                     },
                     error: function (xhr) {
                         var data = $.parseJSON(xhr.responseText);

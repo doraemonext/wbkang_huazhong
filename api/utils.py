@@ -32,4 +32,4 @@ def convert_sale_to_bonus(sale):
     elif sale < 1.3:
         return 2.2
     else:
-        return 2.2 + ceil((sale - 1.3) * 100 / 5) * 0.2
+        return 2.2 + int((sale - 1.25) * 100 / 5) * 0.2
