@@ -11,7 +11,7 @@ from django.db.models import signals
 from django.core.exceptions import ValidationError, MultipleObjectsReturned
 from django.db import transaction
 from django.utils.encoding import smart_unicode
-from perf.utils import get_actual_value
+from perf.utils import get_actual_value, in_merged_cells
 
 
 class Job(models.Model):
@@ -571,12 +571,15 @@ def import_target_data(sender, instance, created, **kwargs):
                 return
 
             try:
-                if staff_target <= client_target:
-                    StaffTarget.objects.get_or_create(client_target=client_target_model, staff=staff,
-                                                      target=staff_target)
+                if in_merged_cells(merged_cells, row, 9):
+                    if staff_target <= client_target:
+                        StaffTarget.objects.get_or_create(client_target=client_target_model, staff=staff,
+                                                          target=staff_target)
+                    else:
+                        StaffTarget.objects.get_or_create(client_target=client_target_model, staff=staff,
+                                                          target=client_target)
                 else:
-                    StaffTarget.objects.get_or_create(client_target=client_target_model, staff=staff,
-                                                      target=client_target)
+                    StaffTarget.objects.get_or_create(client_target=client_target_model, staff=staff, target=staff_target)
             except Exception as e:
                 transaction.savepoint_rollback(sid)
                 instance.imported = False
