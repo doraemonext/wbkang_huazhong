@@ -152,12 +152,12 @@
                         $('#bonus_base').html(data['bonus_base'] + " 元");
                         $('#job_weight').html(data['job_weight']);
                         $('#area_weight').html(data['area_weight']);
-                        $('#last_month_reach').html(data['last_month_reach'] * 100 + "%");
-                        $('#current_month_reach').html(data['current_month_reach'] * 100 + "%");
-                        $('#sfa_reach').html(data['sfa_reach'] * 100 + "%");
-                        $('#sale_bonus').html(data['sale_bonus'] + " 元");
-                        $('#exam_bonus').html(data['exam_bonus'] + " 元");
-                        $('#total_bonus').html(data['total_bonus'] + " 元");
+                        $('#last_month_reach').html((parseFloat(parseInt(data['last_month_reach'] * 10000)) / 100).toFixed(2) + "%");
+                        $('#current_month_reach').html((parseFloat(parseInt(data['current_month_reach'] * 10000)) / 100).toFixed(2) + "%");
+                        $('#sfa_reach').html((parseFloat(parseInt(data['sfa_reach'] * 10000)) / 100).toFixed(2) + "%");
+                        $('#sale_bonus').html((parseFloat(parseInt(data['sale_bonus'] * 100)) / 100).toFixed(2) + " 元");
+                        $('#exam_bonus').html((parseFloat(parseInt(data['exam_bonus'] * 100)) / 100).toFixed(2) + " 元");
+                        $('#total_bonus').html((parseFloat(parseInt(data['total_bonus'] * 100)) / 100).toFixed(2) + " 元");
                         $('.weui_loading_toast').css('display', 'none');
                     },
                     error: function (xhr) {
