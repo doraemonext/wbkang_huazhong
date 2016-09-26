@@ -33,6 +33,14 @@
                 <div class="weui_cell_ft" id="name"></div>
             </div>
             <div class="weui_cell">
+                <div class="weui_cell_bd weui_cell_primary"><p>所别</p></div>
+                <div class="weui_cell_ft" id="place"></div>
+            </div>
+            <div class="weui_cell">
+                <div class="weui_cell_bd weui_cell_primary"><p>组别</p></div>
+                <div class="weui_cell_ft" id="group"></div>
+            </div>
+            <div class="weui_cell">
                 <div class="weui_cell_bd weui_cell_primary"><p>岗位</p></div>
                 <div class="weui_cell_ft" id="job_name"></div>
             </div>
@@ -67,6 +75,22 @@
             <div class="weui_cell">
                 <div class="weui_cell_bd weui_cell_primary"><p>考核计奖</p></div>
                 <div class="weui_cell_ft" id="exam_bonus"></div>
+            </div>
+            <div class="weui_cell">
+                <div class="weui_cell_bd weui_cell_primary"><p>请假/惩处扣款</p></div>
+                <div class="weui_cell_ft" id="vacation_deduct"></div>
+            </div>
+            <div class="weui_cell">
+                <div class="weui_cell_bd weui_cell_primary"><p>主管调整</p></div>
+                <div class="weui_cell_ft" id="leader_adjust"></div>
+            </div>
+            <div class="weui_cell">
+                <div class="weui_cell_bd weui_cell_primary"><p>加码奖</p></div>
+                <div class="weui_cell_ft" id="add_bonus"></div>
+            </div>
+            <div class="weui_cell">
+                <div class="weui_cell_bd weui_cell_primary"><p>其他奖金</p></div>
+                <div class="weui_cell_ft" id="other_bonus"></div>
             </div>
             <div class="weui_cell">
                 <div class="weui_cell_bd weui_cell_primary"><p>奖金合计</p></div>
@@ -124,6 +148,8 @@
         jQuery(document).ready(function () {
             $('#datelist').on('change', function () {
                 $('#name').html('');
+                $('#place').html('');
+                $('#group').html('');
                 $('#job_name').html('');
                 $('#bonus_base').html('');
                 $('#job_weight').html('');
@@ -133,6 +159,10 @@
                 $('#sfa_reach').html('');
                 $('#sale_bonus').html('');
                 $('#exam_bonus').html('');
+                $('#vacation_deduct').html('');
+                $('#leader_adjust').html('');
+                $('#add_bonus').html('');
+                $('#other_bonus').html('');
                 $('#total_bonus').html('');
                 $('.weui_loading_toast').css('display', 'block');
 
@@ -148,6 +178,8 @@
                     success: function (data) {
                         data = data['data'];
                         $('#name').html(data['name']);
+                        $('#place').html(data['place']);
+                        $('#group').html(data['group']);
                         $('#job_name').html(data['job_name']);
                         $('#bonus_base').html(data['bonus_base'] + " 元");
                         $('#job_weight').html(data['job_weight']);
@@ -157,6 +189,10 @@
                         $('#sfa_reach').html((parseFloat(parseInt(data['sfa_reach'] * 10000)) / 100).toFixed(2) + "%");
                         $('#sale_bonus').html((parseFloat(parseInt(data['sale_bonus'] * 100)) / 100).toFixed(2) + " 元");
                         $('#exam_bonus').html((parseFloat(parseInt(data['exam_bonus'] * 100)) / 100).toFixed(2) + " 元");
+                        $('#vacation_deduct').html((parseFloat(parseInt(data['vacation_deduct'] * 100)) / 100).toFixed(2) + " 元");
+                        $('#leader_adjust').html((parseFloat(parseInt(data['leader_adjust'] * 100)) / 100).toFixed(2) + " 元");
+                        $('#add_bonus').html((parseFloat(parseInt(data['add_bonus'] * 100)) / 100).toFixed(2) + " 元");
+                        $('#other_bonus').html((parseFloat(parseInt(data['other_bonus'] * 100)) / 100).toFixed(2) + " 元");
                         $('#total_bonus').html((parseFloat(parseInt(data['total_bonus'] * 100)) / 100).toFixed(2) + " 元");
                         $('.weui_loading_toast').css('display', 'none');
                     },

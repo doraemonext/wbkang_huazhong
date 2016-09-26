@@ -53,13 +53,6 @@
                 </div>
                 <div class="weui_cell">
                     <div class="weui_cell_bd weui_cell_primary">
-                        <p>R3 客户代码</p>
-                    </div>
-                    <div class="weui_cell_ft" id="client_identifier">
-                    </div>
-                </div>
-                <div class="weui_cell">
-                    <div class="weui_cell_bd weui_cell_primary">
                         <p>R3 客户目标金额</p>
                     </div>
                     <div class="weui_cell_ft" id="client_target">
@@ -158,7 +151,6 @@
                    $('#job_name').html(data['job_name']);
                    $('#target').html((parseFloat(parseInt(data['target'] * 100)) / 100).toFixed(2) + " 元");
                    $('#client_name').html(data['client_name']);
-                   $('#client_identifier').html(data['client_identifier']);
                    $('#client_target').html((parseFloat(parseInt(data['client_target'] * 100)) / 100).toFixed(2) + " 元");
                },
                error: function (xhr) {

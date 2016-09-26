@@ -198,6 +198,13 @@ class BonusHistory(models.Model):
     sfa_reach = models.FloatField('SFA回单达成系数占比', help_text='取值范围 0 - 1')
     sale_bonus = models.FloatField('个人销售奖金')
     exam_bonus = models.FloatField('个人考核奖金')
+    place = models.CharField('所别', max_length=100, default='', blank=True)
+    group = models.CharField('组别', max_length=100, default='', blank=True)
+    vacation_deduct = models.FloatField('请假/惩处扣款', default=0)
+    leader_adjust = models.FloatField('主管调整', default=0)
+    add_bonus = models.FloatField('加码奖', default=0)
+    other_bonus = models.FloatField('其他奖金', default=0)
+    total_bonus = models.FloatField('奖金合计', default=0)
 
     def clean(self):
         if self.year < 1900 or self.year > 2100 or self.month < 1 or self.month > 12:
@@ -375,9 +382,9 @@ def import_history_data(sender, instance, created, **kwargs):
         instance.message = "数据文件不足 3 行"
         instance.save()
         return
-    if ncols != 25:
+    if ncols != 20:
         instance.imported = False
-        instance.message = "数据文件列数不为 25"
+        instance.message = "数据文件列数不为 20"
         instance.save()
         return
 
@@ -387,7 +394,7 @@ def import_history_data(sender, instance, created, **kwargs):
         identifier = None
         staff = None
         try:
-            identifier = str(int(sheet.cell_value(row, 2)))
+            identifier = str(int(sheet.cell_value(row, 3)))
             if not identifier:
                 valid_staff = False
         except ValueError:
@@ -403,11 +410,18 @@ def import_history_data(sender, instance, created, **kwargs):
             instance.save()
             return
 
-        last_month_reach = get_actual_value(sheet, merged_cells, row, 10)
-        current_month_reach = get_actual_value(sheet, merged_cells, row, 13)
-        sfa_reach = get_actual_value(sheet, merged_cells, row, 20)
-        sale_bonus = get_actual_value(sheet, merged_cells, row, 21)
-        exam_bonus = get_actual_value(sheet, merged_cells, row, 23)
+        place = get_actual_value(sheet, merged_cells, row, 1)
+        group = get_actual_value(sheet, merged_cells, row, 2)
+        last_month_reach = get_actual_value(sheet, merged_cells, row, 9)
+        current_month_reach = get_actual_value(sheet, merged_cells, row, 10)
+        sfa_reach = get_actual_value(sheet, merged_cells, row, 11)
+        sale_bonus = get_actual_value(sheet, merged_cells, row, 12)
+        exam_bonus = get_actual_value(sheet, merged_cells, row, 13)
+        vacation_deduct = get_actual_value(sheet, merged_cells, row, 14)
+        leader_adjust = get_actual_value(sheet, merged_cells, row, 15)
+        add_bonus = get_actual_value(sheet, merged_cells, row, 17)
+        other_bonus = get_actual_value(sheet, merged_cells, row, 18)
+        total_bonus = get_actual_value(sheet, merged_cells, row, 19)
 
         bonus_history = BonusHistory.objects.filter(year=instance.year, month=instance.month, staff=staff)
         if bonus_history.exists():
@@ -427,6 +441,13 @@ def import_history_data(sender, instance, created, **kwargs):
                 sfa_reach=sfa_reach,
                 sale_bonus=sale_bonus,
                 exam_bonus=exam_bonus,
+                place=place,
+                group=group,
+                vacation_deduct=vacation_deduct,
+                leader_adjust=leader_adjust,
+                add_bonus=add_bonus,
+                other_bonus=other_bonus,
+                total_bonus=total_bonus,
             )
         except Exception as e:
             transaction.savepoint_rollback(sid)

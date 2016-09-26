@@ -511,10 +511,18 @@ class BonusHistoryAPI(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         history = history_list[0]
+
+        # 计算奖金合计
+        total_bonus = history.total_bonus
+        if total_bonus <= 0:
+            total_bonus = history.sale_bonus + history.exam_bonus - history.vacation_deduct + history.leader_adjust + history.add_bonus + history.other_bonus
+
         return Response({
             'code': 0,
             'message': '',
             'data': {
+                'place': history.place,
+                'group': history.group,
                 'name': history.name,
                 'job_name': history.job_name,
                 'bonus_base': history.bonus_base,
@@ -525,7 +533,11 @@ class BonusHistoryAPI(APIView):
                 'sfa_reach': history.sfa_reach,
                 'sale_bonus': history.sale_bonus,
                 'exam_bonus': history.exam_bonus,
-                'total_bonus': history.sale_bonus + history.exam_bonus,
+                'vacation_deduct': history.vacation_deduct,
+                'leader_adjust': history.leader_adjust,
+                'add_bonus': history.add_bonus,
+                'other_bonus': history.other_bonus,
+                'total_bonus': total_bonus,
             }
         }, status=status.HTTP_200_OK)
 

@@ -115,7 +115,7 @@ class StaffTargetAdmin(admin.ModelAdmin):
 
 class BonusHistoryAdmin(admin.ModelAdmin):
     exclude = ('name', 'job_name', 'bonus_base', 'job_weight', 'area_weight')
-    list_display = ('date', 'staff_name', 'job_name', 'bonus_base', 'job_weight', 'area_weight', 'last_month_reach_percent', 'current_month_reach_percent', 'sfa_reach_percent', 'sale_bonus_disp', 'exam_bonus_disp', 'total_bonus')
+    list_display = ('date', 'staff_name', 'job_name', 'last_month_reach_percent', 'current_month_reach_percent', 'sfa_reach_percent', 'sale_bonus_disp', 'exam_bonus_disp', 'vacation_deduct_disp', 'leader_adjust_disp', 'add_bonus_disp', 'other_bonus_disp', 'total_bonus_disp')
 
     def date(self, obj):
         return "%d年%d月" % (obj.year, obj.month)
@@ -138,8 +138,23 @@ class BonusHistoryAdmin(admin.ModelAdmin):
     def exam_bonus_disp(self, obj):
         return "%0.2f 元" % obj.exam_bonus
 
-    def total_bonus(self, obj):
-        return "%0.2f 元" % (obj.sale_bonus + obj.exam_bonus)
+    def vacation_deduct_disp(self, obj):
+        return "%0.2f 元" % obj.vacation_deduct
+
+    def leader_adjust_disp(self, obj):
+        return "%0.2f 元" % obj.leader_adjust
+
+    def add_bonus_disp(self, obj):
+        return "%0.2f 元" % obj.add_bonus
+
+    def other_bonus_disp(self, obj):
+        return "%0.2f 元" % obj.other_bonus
+
+    def total_bonus_disp(self, obj):
+        total = obj.total_bonus
+        if total <= 0:
+            total = obj.sale_bonus + obj.exam_bonus - obj.vacation_deduct + obj.leader_adjust + obj.add_bonus + obj.other_bonus
+        return "%0.2f 元" % total
 
     date.short_description = '日期'
     staff_name.short_description = '姓名'
@@ -148,7 +163,11 @@ class BonusHistoryAdmin(admin.ModelAdmin):
     sfa_reach_percent.short_description = 'SFA回单达成系数占比'
     sale_bonus_disp.short_description = '销售奖金'
     exam_bonus_disp.short_description = '考核奖金'
-    total_bonus.short_description = '奖金合计'
+    vacation_deduct_disp.short_description = '请假/惩处扣款'
+    leader_adjust_disp.short_description = '主管调整'
+    add_bonus_disp.short_description = '加码奖'
+    other_bonus_disp.short_description = '其他奖金'
+    total_bonus_disp.short_description = '奖金合计'
 
 
 class StaffDataImportAdmin(admin.ModelAdmin):
