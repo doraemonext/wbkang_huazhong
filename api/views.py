@@ -515,7 +515,7 @@ class BonusHistoryAPI(APIView):
         # 计算奖金合计
         total_bonus = history.total_bonus
         if total_bonus <= 0:
-            total_bonus = history.sale_bonus + history.exam_bonus - history.vacation_deduct + history.leader_adjust + history.add_bonus + history.other_bonus
+            total_bonus = history.sale_bonus + history.exam_bonus + history.vacation_deduct + history.leader_adjust + history.add_bonus + history.other_bonus
 
         return Response({
             'code': 0,

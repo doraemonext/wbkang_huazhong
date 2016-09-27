@@ -153,7 +153,7 @@ class BonusHistoryAdmin(admin.ModelAdmin):
     def total_bonus_disp(self, obj):
         total = obj.total_bonus
         if total <= 0:
-            total = obj.sale_bonus + obj.exam_bonus - obj.vacation_deduct + obj.leader_adjust + obj.add_bonus + obj.other_bonus
+            total = obj.sale_bonus + obj.exam_bonus + obj.vacation_deduct + obj.leader_adjust + obj.add_bonus + obj.other_bonus
         return "%0.2f 元" % total
 
     date.short_description = '日期'
