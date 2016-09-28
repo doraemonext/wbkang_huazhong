@@ -115,13 +115,16 @@ class StaffTargetAdmin(admin.ModelAdmin):
 
 class BonusHistoryAdmin(admin.ModelAdmin):
     exclude = ('name', 'job_name', 'bonus_base', 'job_weight', 'area_weight')
-    list_display = ('date', 'staff_name', 'job_name', 'last_month_reach_percent', 'current_month_reach_percent', 'sfa_reach_percent', 'sale_bonus_disp', 'exam_bonus_disp', 'vacation_deduct_disp', 'leader_adjust_disp', 'add_bonus_disp', 'other_bonus_disp', 'total_bonus_disp')
+    list_display = ('date', 'place', 'group', 'staff_name', 'staff_identifier', 'job_name', 'last_month_reach_percent', 'current_month_reach_percent', 'sfa_reach_percent', 'sale_bonus_disp', 'exam_bonus_disp', 'vacation_deduct_disp', 'leader_adjust_disp', 'add_bonus_disp', 'other_bonus_disp', 'total_bonus_disp')
 
     def date(self, obj):
         return "%d年%d月" % (obj.year, obj.month)
 
     def staff_name(self, obj):
-        return "%s (%s)" % (obj.name, obj.staff.identifier)
+        return "%s" % obj.name
+
+    def staff_identifier(self, obj):
+        return "%s" % obj.staff.identifier
 
     def last_month_reach_percent(self, obj):
         return "%0.2f%%" % (obj.last_month_reach * 100)
@@ -158,6 +161,7 @@ class BonusHistoryAdmin(admin.ModelAdmin):
 
     date.short_description = '日期'
     staff_name.short_description = '姓名'
+    staff_identifier.short_description = '员工ID'
     last_month_reach_percent.short_description = '上月客户达成率'
     current_month_reach_percent.short_description = '本月客户达成率'
     sfa_reach_percent.short_description = 'SFA回单达成系数占比'
