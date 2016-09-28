@@ -452,7 +452,7 @@ def import_history_data(sender, instance, created, **kwargs):
         except Exception as e:
             transaction.savepoint_rollback(sid)
             instance.imported = False
-            instance.message = e.message
+            instance.message = '导入用户ID %s 时存在错误: %s' % (identifier, e.message)
             instance.save()
             return
 
